@@ -51,6 +51,18 @@ pnpm build
 pnpm preview
 ```
 
+## Deploy to Vercel via GitHub Actions
+
+The repository includes a workflow at `.github/workflows/deploy-vercel.yml` that deploys on pushes to `main` (and can also be run manually).
+
+Add these repository secrets in GitHub before running the workflow:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+You can get `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` from your Vercel project settings, and create `VERCEL_TOKEN` from your Vercel account settings.
+
 ## Project Structure
 
 ```text
