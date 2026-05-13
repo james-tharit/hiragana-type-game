@@ -60,6 +60,20 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
   const typedGhost = activeRomaji.slice(0, Math.min(buffer.length, activeRomaji.length));
   const pendingGhost = activeRomaji.slice(Math.min(buffer.length, activeRomaji.length));
 
+  const [hasFailedOnce, setHasFailedOnce] = useState(false);
+  const [targetRevealed, setTargetRevealed] = useState(false);
+
+  useEffect(() => {
+    setHasFailedOnce(false);
+    setTargetRevealed(false);
+  }, [index]);
+
+  useEffect(() => {
+    if (currentWrong) {
+      setHasFailedOnce(true);
+    }
+  }, [currentWrong]);
+
   const focusInput = useCallback(() => {
     inputZoneRef.current?.focus();
   }, []);
@@ -68,6 +82,18 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
     focusInput();
   }, [focusInput]);
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.code === 'Space' && hasFailedOnce && !targetRevealed) {
+        event.preventDefault();
+        setTargetRevealed(true);
+        return;
+      }
+      onKeyDown(event);
+    },
+    [hasFailedOnce, targetRevealed, onKeyDown],
+  );
+
   return (
     <div className="relative">
       <div
@@ -75,7 +101,7 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
         tabIndex={0}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        onKeyDown={onKeyDown}
+        onKeyDown={handleKeyDown}
         className="relative rounded-2xl border border-white/10 bg-black/30 p-6 outline-none transition focus:border-white/30"
       >
         <div className={`transition duration-150 ${isFocused ? 'opacity-100 blur-0' : 'opacity-70 blur-[1.2px]'}`}>
@@ -108,11 +134,21 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
             <p>
               Kana: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{composedKana || '...'}</span>
             </p>
-            <p>
-              Target:{' '}
-              <span className="text-ink-100">{typedGhost}</span>
-              <span className="decoration-ink-700 underline underline-offset-4">{pendingGhost || '...'}</span>
-            </p>
+            {targetRevealed ? (
+              <p>
+                Target:{' '}
+                <span className="text-ink-100">{typedGhost}</span>
+                <span className="decoration-ink-700 underline underline-offset-4">{pendingGhost || '...'}</span>
+              </p>
+            ) : hasFailedOnce ? (
+              <button
+                type="button"
+                onClick={() => setTargetRevealed(true)}
+                className="animate-pulse rounded px-2 py-0.5 text-xs font-medium text-orange-400 ring-1 ring-orange-400/50 transition hover:text-orange-300 hover:ring-orange-300/70"
+              >
+                Reveal target <span className="opacity-60">[Spacebar]</span>
+              </button>
+            ) : null}
             <p>
               Accuracy: <span className="text-ink-100">{accuracy.toFixed(1)}%</span>
             </p>
