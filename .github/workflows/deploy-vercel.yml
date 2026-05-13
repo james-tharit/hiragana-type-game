@@ -38,10 +38,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Build Vercel artifacts
-        run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm build:ssg
 
       - name: Deploy to Vercel
         run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
