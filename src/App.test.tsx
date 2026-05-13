@@ -1,10 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { GROUPS } from './constants/kanaGroups';
 import App from './App';
 
+const renderApp = () => render(<MemoryRouter><App /></MemoryRouter>);
+
 describe('Character filter selection logic', () => {
   it('selects and de-selects ka-ko', () => {
-    render(<App />);
+    renderApp();
 
     const kaButton = screen.getByRole('button', { name: 'ka-ko' });
 
@@ -18,7 +21,7 @@ describe('Character filter selection logic', () => {
   });
 
   it('selects and de-selects an entire group family', () => {
-    render(<App />);
+    renderApp();
 
     const familyToggleButtons = screen.getAllByRole('button', { name: 'Select family' });
     const monographsToggleButton = familyToggleButtons[0];
@@ -33,7 +36,7 @@ describe('Character filter selection logic', () => {
   });
 
   it('only injects characters from the selected family into the type area', () => {
-    render(<App />);
+    renderApp();
 
     // Select all groups so every family button shows "De-select family"
     fireEvent.click(screen.getByRole('button', { name: 'Select all' }));
