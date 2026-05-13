@@ -28,15 +28,19 @@ function AboutPage() {
         <title>About Wakana Type</title>
         <meta
           name="description"
-          content="Learn how Wakana Type helps improve Japanese input speed and accuracy."
+          content="Learn how Wakana Type helps improve Japanese hiragana input accuracy by tracking mistakes and consistency."
         />
         <link rel="canonical" href={`${SITE_URL}/about`} />
       </Helmet>
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">About</h1>
         <p className="mt-4 text-ink-500">
-          This game is built to train hiragana typing speed and consistency using focused kana groups,
-          timing feedback, and round-based drills.
+          Wakana Type is a focused hiragana trainer built around accuracy first. Instead of pushing speed,
+          each round helps you reduce errors and build consistent romaji to kana input habits.
+        </p>
+        <p className="mt-3 text-ink-500">
+          You can practice by kana families, monitor your accuracy in real time, and see exactly how many
+          mistakes were made in a round.
         </p>
         <p className="mt-6">
           <Link className="text-cyan-300 hover:text-cyan-200" to="/">

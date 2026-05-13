@@ -36,9 +36,9 @@ export const GROUPS: Group[] = [
     ],
   },
   {
-    id: 's-line',
+    id: 'sa-so',
     family: 'Monographs',
-    label: 's-line',
+    label: 'sa-so',
     entries: [
       { kana: 'さ', romaji: 'sa' },
       { kana: 'し', romaji: 'shi' },

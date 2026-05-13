@@ -1,14 +1,22 @@
 type StatsDisplayProps = {
   progress: number;
   total: number;
-  wpm: number;
   accuracy: number;
+  mistakeKeystrokes: number;
   totalKeystrokes: number;
   isFinished: boolean;
   onRetry: () => void;
 };
 
-function StatsDisplay({ progress, total, wpm, accuracy, totalKeystrokes, isFinished, onRetry }: StatsDisplayProps) {
+function StatsDisplay({
+  progress,
+  total,
+  accuracy,
+  mistakeKeystrokes,
+  totalKeystrokes,
+  isFinished,
+  onRetry,
+}: StatsDisplayProps) {
   return (
     <>
       <section className="mb-6 grid gap-3 text-sm sm:grid-cols-4">
@@ -19,12 +27,12 @@ function StatsDisplay({ progress, total, wpm, accuracy, totalKeystrokes, isFinis
           </p>
         </div>
         <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Live WPM</p>
-          <p className="mt-1 text-lg font-semibold text-ink-100">{wpm.toFixed(1)}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
           <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Accuracy</p>
           <p className="mt-1 text-lg font-semibold text-ink-100">{accuracy.toFixed(1)}%</p>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+          <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Mistakes</p>
+          <p className="mt-1 text-lg font-semibold text-ink-100">{mistakeKeystrokes}</p>
         </div>
         <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
           <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Keystrokes</p>
@@ -37,10 +45,10 @@ function StatsDisplay({ progress, total, wpm, accuracy, totalKeystrokes, isFinis
           <h2 className="text-lg font-semibold">Result</h2>
           <div className="mt-3 grid gap-2 text-sm text-ink-500 sm:grid-cols-3">
             <p>
-              WPM: <span className="text-xl font-bold text-ink-100">{wpm.toFixed(1)}</span>
+              Accuracy: <span className="text-xl font-bold text-ink-100">{accuracy.toFixed(1)}%</span>
             </p>
             <p>
-              Accuracy: <span className="text-xl font-bold text-ink-100">{accuracy.toFixed(1)}%</span>
+              Mistakes: <span className="text-xl font-bold text-ink-100">{mistakeKeystrokes}</span>
             </p>
             <p>
               Keystrokes: <span className="text-xl font-bold text-ink-100">{totalKeystrokes}</span>

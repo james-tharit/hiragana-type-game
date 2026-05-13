@@ -15,9 +15,9 @@ function App() {
     buffer,
     composedKana,
     totalKeystrokes,
+    mistakeKeystrokes,
     currentWrong,
     isFinished,
-    wpm,
     accuracy,
     resetEngine,
     handleKeyDown,
@@ -108,8 +108,8 @@ function App() {
         <StatsDisplay
           progress={index}
           total={tokens.length}
-          wpm={wpm}
           accuracy={accuracy}
+          mistakeKeystrokes={mistakeKeystrokes}
           totalKeystrokes={totalKeystrokes}
           isFinished={isFinished}
           onRetry={() => resetRound()}
