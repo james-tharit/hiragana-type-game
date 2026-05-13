@@ -8,6 +8,7 @@ import { useTypingEngine } from './hooks/useTypingEngine';
 function App() {
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>(DEFAULT_GROUPS);
   const [tokens, setTokens] = useState(() => createRound(DEFAULT_GROUPS));
+  const allGroupIds = useMemo(() => GROUPS.map((group) => group.id), []);
   const {
     index,
     buffer,
@@ -34,6 +35,26 @@ function App() {
   const toggleGroup = (groupId: string) => {
     setSelectedGroupIds((prev) => {
       const next = prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId];
+      resetRound(next);
+      return next;
+    });
+  };
+
+  const toggleAllGroups = () => {
+    setSelectedGroupIds((prev) => {
+      const next = prev.length === allGroupIds.length ? [] : allGroupIds;
+      resetRound(next);
+      return next;
+    });
+  };
+
+  const toggleGroupFamily = (familyGroupIds: string[]) => {
+    setSelectedGroupIds((prev) => {
+      const familyFullySelected = familyGroupIds.every((id) => prev.includes(id));
+      const next = familyFullySelected
+        ? prev.filter((id) => !familyGroupIds.includes(id))
+        : Array.from(new Set([...prev, ...familyGroupIds]));
+
       resetRound(next);
       return next;
     });
@@ -71,6 +92,8 @@ function App() {
           selectedGroupIds={selectedGroupIds}
           targetKanaLength={targetKanaLength}
           onToggleGroup={toggleGroup}
+          onToggleAllGroups={toggleAllGroups}
+          onToggleGroupFamily={toggleGroupFamily}
         />
 
         <StatsDisplay
