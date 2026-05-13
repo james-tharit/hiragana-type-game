@@ -3,7 +3,7 @@ import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import App from '../App';
 import { GROUPS } from '../constants/kanaGroups';
 
-const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://example.com';
+const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
 function HomePage() {
   return (

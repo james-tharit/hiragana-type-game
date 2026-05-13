@@ -24,7 +24,7 @@ export default defineConfig(async () => {
         }),
       }),
       Sitemap({
-        hostname: process.env.SITE_URL ?? 'https://example.com',
+        hostname: process.env.SITE_URL ?? 'https://www.wakana.sbs',
         dynamicRoutes: prerenderRoutes,
         generateRobotsTxt: true,
       }),
