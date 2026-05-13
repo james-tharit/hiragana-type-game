@@ -9,7 +9,7 @@ function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Hiragana Typing Game | Practice Kana</title>
+        <title>Wakana Type | Practice Kana</title>
         <meta
           name="description"
           content="Practice Japanese hiragana typing with real-time WPM and accuracy metrics."
@@ -25,10 +25,10 @@ function AboutPage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
       <Helmet>
-        <title>About Hiragana Typing Game</title>
+        <title>About Wakana Type</title>
         <meta
           name="description"
-          content="Learn how the Hiragana Typing Game helps improve Japanese input speed and accuracy."
+          content="Learn how Wakana Type helps improve Japanese input speed and accuracy."
         />
         <link rel="canonical" href={`${SITE_URL}/about`} />
       </Helmet>
@@ -59,7 +59,7 @@ function GroupPage() {
   return (
     <>
       <Helmet>
-        <title>{`${group.label} Hiragana Drill | Typing Practice`}</title>
+        <title>{`${group.label} | Wakana Type`}</title>
         <meta
           name="description"
           content={`Practice the ${group.label} kana set with focused typing drills and live performance stats.`}

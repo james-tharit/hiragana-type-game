@@ -74,7 +74,7 @@ function App() {
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Hiragana Typing</h1>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Wakana Type</h1>
             <p className="mt-1 text-sm text-ink-500">
               Type romaji and match kana in real time. Press Esc to restart.
             </p>

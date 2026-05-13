@@ -1,4 +1,4 @@
-# Hiragana Typing Game
+# Wakana Type
 
 A lightweight typing game for practicing Japanese hiragana with romaji input.
 
