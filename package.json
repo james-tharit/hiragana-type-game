@@ -21,21 +21,21 @@
     "wanakana": "^5.3.1"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.7.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.1",
-    "@vitest/coverage-istanbul": "^2.1.8",
-    "autoprefixer": "^10.4.20",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-istanbul": "^2.1.9",
+    "autoprefixer": "^10.5.0",
     "jsdom": "^26.1.0",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.14",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^3.4.19",
     "typescript": "^6.0.3",
-    "vite": "^5.4.9",
+    "vite": "^5.4.21",
     "vite-plugin-prerender": "^1.0.8",
     "vite-plugin-sitemap": "^0.8.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   }
 }

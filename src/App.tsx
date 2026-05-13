@@ -1,4 +1,5 @@
 import { useMemo, useState, type KeyboardEvent } from 'react';
+import { Link } from 'react-router-dom';
 import CharacterFilter from './components/CharacterFilter';
 import StatsDisplay from './components/StatsDisplay';
 import TypingCanvas from './components/TypingCanvas';
@@ -78,13 +79,21 @@ function App() {
               Type romaji and match kana in real time. Press Esc to restart.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => resetRound()}
-            className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
-          >
-            New Round
-          </button>
+          <div className="flex gap-3">
+            <Link
+              to="/about"
+              className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            >
+              About
+            </Link>
+            <button
+              type="button"
+              onClick={() => resetRound()}
+              className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            >
+              New Round
+            </button>
+          </div>
         </header>
 
         <CharacterFilter
