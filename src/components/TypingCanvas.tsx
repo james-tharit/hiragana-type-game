@@ -157,14 +157,7 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
         </div>
       </div>
 
-      {/* Overlay for focus or finish */}
-      {isFinished ? (
-        <div
-          className="absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-black/50"
-        >
-          <span className="text-sm font-semibold uppercase tracking-[0.14em] text-ink-100">Press Esc to restart</span>
-        </div>
-      ) : !isFocused && (
+      {!isFocused && !isFinished && (
         <button
           type="button"
           onMouseDown={(event) => event.preventDefault()}
@@ -172,8 +165,7 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
           className="absolute inset-0 z-20 rounded-2xl bg-black/50 text-sm font-semibold uppercase tracking-[0.14em] text-ink-100"
         >
           Click To Focus
-        </button>
-      )}
+        </button>)}
     </div>
   );
 }

@@ -39,17 +39,4 @@ describe('TypingCanvas', () => {
         });
     })
 
-    describe('Finish state', () => {
-        it('shows finish overlay when isFinished is true', () => {
-            render(<TypingCanvas {...baseProps} isFinished={true} />);
-            expect(screen.getByText(/Press Esc to restart/i)).toBeInTheDocument();
-        });
-
-        it('does not show focus overlay when isFinished is true', () => {
-            render(<TypingCanvas {...baseProps} isFinished={true} />);
-            expect(screen.queryByText(/Click To Focus/i)).not.toBeInTheDocument();
-        });
-    })
-
-
 });
