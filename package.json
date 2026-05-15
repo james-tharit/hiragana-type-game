@@ -35,7 +35,7 @@
     "postcss": "^8.5.14",
     "tailwindcss": "^3.4.19",
     "typescript": "^6.0.3",
-    "vite": "^5.4.21",
+    "vite": "^6.4.2",
     "vite-plugin-prerender": "^1.0.8",
     "vite-plugin-sitemap": "^0.8.2",
     "vitest": "^2.1.9"
