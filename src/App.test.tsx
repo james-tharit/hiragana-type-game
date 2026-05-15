@@ -9,6 +9,9 @@ describe('Character filter selection logic', () => {
   it('selects and de-selects ka-ko', () => {
     renderApp();
 
+    expect(screen.getByText('Selected:')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Show filters' }));
+
     const kaButton = screen.getByRole('button', { name: 'ka-ko' });
 
     expect(kaButton.className).toContain('bg-ink-100');
@@ -22,6 +25,9 @@ describe('Character filter selection logic', () => {
 
   it('selects and de-selects an entire group family', () => {
     renderApp();
+
+    expect(screen.getByText('Selected:')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Show filters' }));
 
     const familyToggleButtons = screen.getAllByRole('button', { name: 'Select family' });
     const monographsToggleButton = familyToggleButtons[0];
@@ -37,6 +43,9 @@ describe('Character filter selection logic', () => {
 
   it('only injects characters from the selected family into the type area', () => {
     renderApp();
+
+    expect(screen.getByText('Selected:')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Show filters' }));
 
     // Select all groups so every family button shows "De-select family"
     fireEvent.click(screen.getByRole('button', { name: 'Select all' }));

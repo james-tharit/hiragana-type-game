@@ -105,16 +105,6 @@ function App() {
           onToggleGroupFamily={toggleGroupFamily}
         />
 
-        <StatsDisplay
-          progress={index}
-          total={tokens.length}
-          accuracy={accuracy}
-          mistakeKeystrokes={mistakeKeystrokes}
-          totalKeystrokes={totalKeystrokes}
-          isFinished={isFinished}
-          onRetry={() => resetRound()}
-        />
-
         <TypingCanvas
           tokens={tokens}
           index={index}
@@ -125,6 +115,17 @@ function App() {
           accuracy={accuracy}
           onKeyDown={onCanvasKeyDown}
         />
+
+        <StatsDisplay
+          progress={index}
+          total={tokens.length}
+          accuracy={accuracy}
+          mistakeKeystrokes={mistakeKeystrokes}
+          totalKeystrokes={totalKeystrokes}
+          onRetry={() => resetRound()}
+        />
+
+        
       </section>
     </main>
   );

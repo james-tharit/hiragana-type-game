@@ -30,6 +30,7 @@ export default defineConfig(async () => {
       }),
     ],
     test: {
+      setupFiles: './setupTests.ts',
       environment: 'jsdom',
       globals: true,
       coverage: {

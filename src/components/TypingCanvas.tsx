@@ -99,13 +99,14 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
       <div
         ref={inputZoneRef}
         tabIndex={0}
+        data-testid="input-zone"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
-        className="relative rounded-2xl border border-white/10 bg-black/30 p-6 outline-none transition focus:border-white/30"
+        className="relative mb-6 min-h-[17rem] rounded-2xl border border-white/10 bg-black/30 p-8 outline-none transition focus:border-white/30 sm:p-10"
       >
         <div className={`transition duration-150 ${isFocused ? 'opacity-100 blur-0' : 'opacity-70 blur-[1.2px]'}`}>
-          <div className="relative flex flex-wrap gap-x-2 gap-y-3 text-3xl leading-tight sm:text-4xl">
+          <div className="relative flex flex-wrap gap-x-2 gap-y-3 text-4xl leading-tight sm:text-5xl">
             {tokens.map((token, tokenIndex) => {
               let status: KanaTokenProps['status'] = 'pending';
 
@@ -127,7 +128,7 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
             })}
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-ink-500">
+          <div className="mt-7 flex flex-wrap items-center gap-4 text-base text-ink-500">
             <p>
               Romaji: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{buffer || '...'}</span>
             </p>
@@ -156,7 +157,14 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
         </div>
       </div>
 
-      {!isFocused && (
+      {/* Overlay for focus or finish */}
+      {isFinished ? (
+        <div
+          className="absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-black/50"
+        >
+          <span className="text-sm font-semibold uppercase tracking-[0.14em] text-ink-100">Press Esc to restart</span>
+        </div>
+      ) : !isFocused && (
         <button
           type="button"
           onMouseDown={(event) => event.preventDefault()}

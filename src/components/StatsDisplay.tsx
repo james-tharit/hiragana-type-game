@@ -4,7 +4,6 @@ type StatsDisplayProps = {
   accuracy: number;
   mistakeKeystrokes: number;
   totalKeystrokes: number;
-  isFinished: boolean;
   onRetry: () => void;
 };
 
@@ -14,7 +13,6 @@ function StatsDisplay({
   accuracy,
   mistakeKeystrokes,
   totalKeystrokes,
-  isFinished,
   onRetry,
 }: StatsDisplayProps) {
   return (
@@ -39,30 +37,6 @@ function StatsDisplay({
           <p className="mt-1 text-lg font-semibold text-ink-100">{totalKeystrokes}</p>
         </div>
       </section>
-
-      {isFinished && (
-        <section className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5">
-          <h2 className="text-lg font-semibold">Result</h2>
-          <div className="mt-3 grid gap-2 text-sm text-ink-500 sm:grid-cols-3">
-            <p>
-              Accuracy: <span className="text-xl font-bold text-ink-100">{accuracy.toFixed(1)}%</span>
-            </p>
-            <p>
-              Mistakes: <span className="text-xl font-bold text-ink-100">{mistakeKeystrokes}</span>
-            </p>
-            <p>
-              Keystrokes: <span className="text-xl font-bold text-ink-100">{totalKeystrokes}</span>
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onRetry}
-            className="mt-4 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
-          >
-            Try Again
-          </button>
-        </section>
-      )}
     </>
   );
 }
