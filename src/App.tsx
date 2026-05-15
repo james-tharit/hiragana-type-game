@@ -73,6 +73,7 @@ function App() {
 
   const focusInputOnWindowKeyDown = useCallback((event: globalThis.KeyboardEvent) => {
     if (!isFocused || document.activeElement !== inputZoneRef.current) {
+      if(event.code === 'Space') return; // Avoid refocusing when toggling filter
       if (event.key.length === 1) {
         inputZoneRef.current?.focus();
         event.preventDefault();

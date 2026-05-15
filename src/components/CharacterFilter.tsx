@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Group } from '../constants/kanaGroups';
 
 type CharacterFilterProps = {
@@ -19,6 +19,20 @@ function CharacterFilter({
   onToggleGroupFamily,
 }: CharacterFilterProps) {
   const [isFolded, setIsFolded] = useState(true);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.code === 'Space' &&
+        !event.ctrlKey && !event.metaKey && !event.altKey &&
+        (document.activeElement as HTMLElement | null)?.dataset?.testid !== 'input-zone'
+      ) {
+        setIsFolded((prev) => !prev);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const groupedFilters = useMemo(() => {
     const map = new Map<string, Group[]>();
@@ -58,14 +72,19 @@ function CharacterFilter({
         <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-ink-500">Filter</h2>
         <div className="flex items-center gap-3">
           <span className="text-xs text-ink-500">Kana in set: {targetKanaLength}</span>
-          <button
-            type="button"
-            onClick={() => setIsFolded((prev) => !prev)}
-            aria-expanded={!isFolded}
-            className="rounded-md border border-white/20 bg-white/5 px-2.5 py-1 text-xs font-medium text-ink-500 transition hover:bg-white/10 hover:text-ink-100"
-          >
-            {isFolded ? 'Show filters' : 'Hide filters'}
-          </button>
+          <div className="group relative">
+            <button
+              type="button"
+              onClick={() => setIsFolded((prev) => !prev)}
+              aria-expanded={!isFolded}
+              className="rounded-md border border-white/20 bg-white/5 px-2.5 py-1 text-xs font-medium text-ink-500 transition hover:bg-white/10 hover:text-ink-100"
+            >
+              {isFolded ? 'Show filters' : 'Hide filters'}
+            </button>
+            <span className="pointer-events-none absolute -bottom-2 left-1/2 -translate-x-1/2 rounded bg-black/80 px-1.5 py-0.5 text-[10px] text-ink-400">
+              Space
+            </span>
+          </div>
         </div>
       </div>
 
