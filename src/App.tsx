@@ -71,23 +71,26 @@ function App() {
     }
   };
 
-  // Focus TypingCanvas input if not focused and any character key is pressed
-  const handleAppKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (!isFocused && event.key.length === 1) {
-        console.log('Focusing input due to key press:', event.key);
+  const focusInputOnWindowKeyDown = useCallback((event: globalThis.KeyboardEvent) => {
+    if (!isFocused || document.activeElement !== inputZoneRef.current) {
+      if (event.key.length === 1) {
         inputZoneRef.current?.focus();
         event.preventDefault();
       }
-    },
-    [isFocused],
-  );
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', focusInputOnWindowKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', focusInputOnWindowKeyDown);
+    };
+  }, [focusInputOnWindowKeyDown]);
 
   return (
     <main
       className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8"
-      tabIndex={-1}
-      onKeyDown={handleAppKeyDown}
     >
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
