@@ -126,28 +126,36 @@ function App() {
           onToggleGroupFamily={toggleGroupFamily}
         />
 
-        <TypingCanvas
-          tokens={tokens}
-          index={index}
-          buffer={buffer}
-          composedKana={composedKana}
-          currentWrong={currentWrong}
-          isFinished={isFinished}
-          accuracy={accuracy}
-          onKeyDown={onCanvasKeyDown}
-          inputZoneRef={inputZoneRef}
-          setIsFocused={setIsFocused}
-          isFocused={isFocused}
-        />
 
-        <StatsDisplay
-          progress={index}
-          total={tokens.length}
-          accuracy={accuracy}
-          mistakeKeystrokes={mistakeKeystrokes}
-          totalKeystrokes={totalKeystrokes}
-          onRetry={() => resetRound()}
-        />
+        <div className="relative">
+          <TypingCanvas
+            tokens={tokens}
+            index={index}
+            buffer={buffer}
+            composedKana={composedKana}
+            currentWrong={currentWrong}
+            isFinished={isFinished}
+            accuracy={accuracy}
+            onKeyDown={onCanvasKeyDown}
+            inputZoneRef={inputZoneRef}
+            setIsFocused={setIsFocused}
+            isFocused={isFocused}
+          />
+          {/* Overlay StatsDisplay with fade-in when finished */}
+          <div
+            className={`absolute inset-0 z-30 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/80 p-8 backdrop-blur-sm transition-opacity duration-500 sm:p-10 ${isFinished ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          >
+            <StatsDisplay
+              progress={index}
+              total={tokens.length}
+              accuracy={accuracy}
+              mistakeKeystrokes={mistakeKeystrokes}
+              totalKeystrokes={totalKeystrokes}
+              onRetry={() => resetRound()}
+              isFinished={isFinished}
+            />
+          </div>
+        </div>
 
         
       </section>

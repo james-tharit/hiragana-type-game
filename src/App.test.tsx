@@ -4,7 +4,7 @@ import App from './App';
 
 const renderApp = () => render(<MemoryRouter><App /></MemoryRouter>);
 
-describe('Character filter selection logic', () => {
+describe('Window Focus', () => {
   it('refocuses the typing input when a character key is pressed while unfocused', () => {
     renderApp();
 

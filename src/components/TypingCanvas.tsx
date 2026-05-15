@@ -168,7 +168,7 @@ function TypingCanvas({
         </div>
       </div>
 
-      {!isFocused && (
+      {!isFocused && !isFinished && (
         <button
           type="button"
           onMouseDown={(event) => event.preventDefault()}
