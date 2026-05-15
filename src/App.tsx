@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent } from 'react';
+import { useMemo, useRef, useState, useCallback, useEffect, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import CharacterFilter from './components/CharacterFilter';
 import StatsDisplay from './components/StatsDisplay';
@@ -7,6 +7,8 @@ import { createRound, DEFAULT_GROUPS, GROUPS } from './constants/kanaGroups';
 import { useTypingEngine } from './hooks/useTypingEngine';
 
 function App() {
+  const inputZoneRef = useRef<HTMLDivElement | null>(null);
+  const [isFocused, setIsFocused] = useState(true);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>(DEFAULT_GROUPS);
   const [tokens, setTokens] = useState(() => createRound(DEFAULT_GROUPS));
   const allGroupIds = useMemo(() => GROUPS.map((group) => group.id), []);
@@ -69,8 +71,24 @@ function App() {
     }
   };
 
+  // Focus TypingCanvas input if not focused and any character key is pressed
+  const handleAppKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!isFocused && event.key.length === 1) {
+        console.log('Focusing input due to key press:', event.key);
+        inputZoneRef.current?.focus();
+        event.preventDefault();
+      }
+    },
+    [isFocused],
+  );
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
+    <main
+      className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8"
+      tabIndex={-1}
+      onKeyDown={handleAppKeyDown}
+    >
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -114,6 +132,9 @@ function App() {
           isFinished={isFinished}
           accuracy={accuracy}
           onKeyDown={onCanvasKeyDown}
+          inputZoneRef={inputZoneRef}
+          setIsFocused={setIsFocused}
+          isFocused={isFocused}
         />
 
         <StatsDisplay

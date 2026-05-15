@@ -6,6 +6,23 @@ import App from './App';
 const renderApp = () => render(<MemoryRouter><App /></MemoryRouter>);
 
 describe('Character filter selection logic', () => {
+  it('refocuses the typing input when a character key is pressed while unfocused', () => {
+    const { container } = renderApp();
+
+    const inputZone = screen.getByTestId('input-zone');
+    fireEvent.blur(inputZone);
+
+    expect(screen.getByRole('button', { name: /click or press any key to focus/i })).toBeTruthy();
+
+    const appContainer = container.querySelector('main');
+
+    expect(appContainer).not.toBeNull();
+
+    fireEvent.keyDown(appContainer!, { key: 'a' });
+
+    expect(inputZone).toHaveFocus();
+  });
+
   it('selects and de-selects ka-ko', () => {
     renderApp();
 

@@ -45,9 +45,20 @@ const KanaToken = memo(
   (prev, next) => prev.kana === next.kana && prev.status === next.status,
 );
 
-function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFinished, accuracy, onKeyDown }: TypingCanvasProps) {
-  const inputZoneRef = useRef<HTMLDivElement | null>(null);
-  const [isFocused, setIsFocused] = useState(true);
+function TypingCanvas({
+  tokens,
+  index,
+  buffer,
+  composedKana,
+  currentWrong,
+  isFinished,
+  accuracy,
+  onKeyDown,
+  inputZoneRef,
+  setIsFocused,
+  isFocused
+}: TypingCanvasProps & { inputZoneRef: React.RefObject<HTMLDivElement | null>, setIsFocused: (v: boolean) => void, isFocused: boolean }) {
+
 
   const activeRomaji = useMemo(() => {
     if (isFinished || !tokens[index]) {
@@ -75,8 +86,8 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
   }, [currentWrong]);
 
   const focusInput = useCallback(() => {
-    inputZoneRef.current?.focus();
-  }, []);
+    inputZoneRef?.current?.focus();
+  }, [inputZoneRef]);
 
   useEffect(() => {
     focusInput();
@@ -157,14 +168,15 @@ function TypingCanvas({ tokens, index, buffer, composedKana, currentWrong, isFin
         </div>
       </div>
 
-      {!isFocused && !isFinished && (
+      {!isFocused && (
         <button
           type="button"
           onMouseDown={(event) => event.preventDefault()}
           onClick={focusInput}
+          tabIndex={0}
           className="absolute inset-0 z-20 rounded-2xl bg-black/50 text-sm font-semibold uppercase tracking-[0.14em] text-ink-100"
         >
-          Click To Focus
+          Click or Press Any Key To Focus
         </button>)}
     </div>
   );

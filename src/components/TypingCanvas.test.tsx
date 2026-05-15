@@ -20,19 +20,33 @@ describe('TypingCanvas', () => {
         onKeyDown: vi.fn(),
     };
 
+    function FocusHarness() {
+        const [isFocused, setIsFocused] = React.useState(true);
+        const inputZoneRef = React.useRef<HTMLDivElement>(null);
+
+        return (
+            <TypingCanvas
+                {...baseProps}
+                inputZoneRef={inputZoneRef}
+                isFocused={isFocused}
+                setIsFocused={setIsFocused}
+            />
+        );
+    }
+
     describe('Focus', () => {
         it('shows focus overlay when not focused', () => {
-            render(<TypingCanvas {...baseProps} />);
+            render(<FocusHarness />);
             // Blur the input zone
             const inputZone = screen.getByTestId('input-zone');
             fireEvent.blur(inputZone);
-            expect(screen.getByText(/Click To Focus/i)).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /Click or Press Any Key To Focus/i })).toBeInTheDocument();
         });
         it('focuses input when Click To Focus is clicked', () => {
-            render(<TypingCanvas {...baseProps} />);
+            render(<FocusHarness />);
             const inputZone = screen.getByTestId('input-zone');
             fireEvent.blur(inputZone);
-            const focusBtn = screen.getByText(/Click To Focus/i);
+            const focusBtn = screen.getByRole('button', { name: /Click or Press Any Key To Focus/i });
             fireEvent.click(focusBtn);
             // After click, input should be focused
             expect(inputZone).toHaveFocus();
