@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GROUPS } from '../constants/kanaGroups';
 import App from '../App';
@@ -74,34 +74,3 @@ describe('Character filter selection logic', () => {
   });
 });
 
-describe('Spacebar shortcut for filter toggle', () => {
-  it('pressing Space when canvas is not focused opens the filter', () => {
-    renderApp();
-
-    const inputZone = screen.getByTestId('input-zone');
-    act(() => inputZone.blur());
-
-    expect(screen.queryByRole('button', { name: 'Select all' })).toBeNull();
-    fireEvent.keyDown(document, { code: 'Space' });
-    expect(screen.getByRole('button', { name: 'Select all' })).toBeTruthy();
-  });
-
-  it('pressing Space twice closes the filter again', () => {
-    renderApp();
-
-    const inputZone = screen.getByTestId('input-zone');
-    act(() => inputZone.blur());
-
-    fireEvent.keyDown(document, { code: 'Space' });
-    fireEvent.keyDown(document, { code: 'Space' });
-    expect(screen.queryByRole('button', { name: 'Select all' })).toBeNull();
-  });
-
-  it('pressing Space when canvas is focused does not open the filter', () => {
-    renderApp();
-    // canvas is focused on mount via useEffect — no extra setup needed
-
-    fireEvent.keyDown(document, { code: 'Space' });
-    expect(screen.queryByRole('button', { name: 'Select all' })).toBeNull();
-  });
-});

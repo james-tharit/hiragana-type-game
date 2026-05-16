@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useCallback, useEffect, type KeyboardEvent } from 'react';
+import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CharacterFilter from './components/CharacterFilter';
 import StatsDisplay from './components/StatsDisplay';
@@ -22,8 +22,10 @@ function App() {
     isFinished,
     accuracy,
     resetEngine,
-    handleKeyDown,
-  } = useTypingEngine(tokens);
+    hasFailedOnce,
+    targetRevealed,
+    revealTarget,
+  } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
 
   const targetKanaLength = useMemo(
     () => tokens.reduce((sum, token) => sum + token.kana.length, 0),
@@ -63,17 +65,11 @@ function App() {
     });
   };
 
-  const onCanvasKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const result = handleKeyDown(event);
-
-    if (result === 'reset-round') {
-      resetRound();
-    }
-  };
-
+  // Focuses the input zone on any key press so the focus overlay dismisses
+  // even when the div isn't already the active element. The hook's window
+  // listener handles the actual game input independently of focus state.
   const focusInputOnWindowKeyDown = useCallback((event: globalThis.KeyboardEvent) => {
     if (!isFocused || document.activeElement !== inputZoneRef.current) {
-      if(event.code === 'Space') return; // Avoid refocusing when toggling filter
       if (event.key.length === 1) {
         inputZoneRef.current?.focus();
         event.preventDefault();
@@ -137,7 +133,9 @@ function App() {
             currentWrong={currentWrong}
             isFinished={isFinished}
             accuracy={accuracy}
-            onKeyDown={onCanvasKeyDown}
+            hasFailedOnce={hasFailedOnce}
+            targetRevealed={targetRevealed}
+            revealTarget={revealTarget}
             inputZoneRef={inputZoneRef}
             setIsFocused={setIsFocused}
             isFocused={isFocused}

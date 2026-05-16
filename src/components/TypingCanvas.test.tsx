@@ -17,7 +17,9 @@ describe('TypingCanvas', () => {
         currentWrong: false,
         isFinished: false,
         accuracy: 100,
-        onKeyDown: vi.fn(),
+        hasFailedOnce: false,
+        targetRevealed: false,
+        revealTarget: vi.fn(),
     };
 
     function FocusHarness() {

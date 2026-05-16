@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { toHiragana } from 'wanakana';
 import type { Entry } from '../constants/kanaGroups';
 
@@ -18,7 +18,11 @@ type UseTypingEngineResult = {
   completedKanaLength: number;
   wpm: number;
   accuracy: number;
+  hasFailedOnce: boolean;
+  targetRevealed: boolean;
+  revealTarget: () => void;
   resetEngine: () => void;
+  /** Exposed for unit-test instrumentation. The window listener drives production input. */
   handleKeyDown: (event: KeyboardEvent<HTMLDivElement>) => KeyResult;
 };
 
@@ -55,7 +59,14 @@ function checkInput(buffer: string, targetRomaji: string, targetKana: string): I
   };
 }
 
-export function useTypingEngine(tokens: Entry[]): UseTypingEngineResult {
+/**
+ * @param tokens - The sequence of kana/romaji entries for the current round.
+ * @param onResetRound - Called by the internal window listener when the user
+ *   presses Escape or Enter-on-finish. The callback should create new tokens
+ *   (e.g. `setTokens(createRound(groupIds))`). The engine resets its own state
+ *   before invoking this callback, so callers do NOT need to call `resetEngine`.
+ */
+export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): UseTypingEngineResult {
   const [index, setIndex] = useState(0);
   const [buffer, setBuffer] = useState('');
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -64,6 +75,8 @@ export function useTypingEngine(tokens: Entry[]): UseTypingEngineResult {
   const [mistakeKeystrokes, setMistakeKeystrokes] = useState(0);
   const [currentWrong, setCurrentWrong] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [hasFailedOnce, setHasFailedOnce] = useState(false);
+  const [targetRevealed, setTargetRevealed] = useState(false);
 
   const isFinished = index >= tokens.length;
 
@@ -124,7 +137,11 @@ export function useTypingEngine(tokens: Entry[]): UseTypingEngineResult {
     setMistakeKeystrokes(0);
     setCurrentWrong(false);
     setNow(Date.now());
+    setHasFailedOnce(false);
+    setTargetRevealed(false);
   };
+
+  const revealTarget = () => setTargetRevealed(true);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): KeyResult => {
     if (event.key === 'Tab') {
@@ -195,6 +212,76 @@ export function useTypingEngine(tokens: Entry[]): UseTypingEngineResult {
     return 'none';
   };
 
+  // ── UI reveal state ──────────────────────────────────────────────────────
+  // Reset per-token reveal flags whenever the active token advances.
+  useEffect(() => {
+    setHasFailedOnce(false);
+    setTargetRevealed(false);
+  }, [index]);
+
+  // Latch hasFailedOnce the first time the current token is answered wrong.
+  useEffect(() => {
+    if (currentWrong) {
+      setHasFailedOnce(true);
+    }
+  }, [currentWrong]);
+
+  // ── Window keyboard listener ─────────────────────────────────────────────
+  // A single stable listener is registered once. A ref keeps it current with
+  // the latest closure values so it never needs to be re-registered.
+  type ListenerSnapshot = {
+    handleKeyDown: typeof handleKeyDown;
+    hasFailedOnce: boolean;
+    targetRevealed: boolean;
+    resetEngine: () => void;
+    onResetRound: () => void;
+  };
+
+  const listenerRef = useRef<ListenerSnapshot | null>(null);
+
+  // Update snapshot after every render (no dependency array intentional).
+  useEffect(() => {
+    listenerRef.current = {
+      handleKeyDown,
+      hasFailedOnce,
+      targetRevealed,
+      resetEngine,
+      onResetRound: onResetRound ?? (() => {}),
+    };
+  });
+
+  // Register once – the handler reads fresh values via the ref.
+  useEffect(() => {
+    const handler = (event: globalThis.KeyboardEvent) => {
+      const snap = listenerRef.current;
+      if (!snap) return;
+
+      // Space reveals the target romaji when the user has already failed.
+      if (event.code === 'Space' && snap.hasFailedOnce && !snap.targetRevealed) {
+        event.preventDefault();
+        setTargetRevealed(true);
+        return;
+      }
+
+      // Adapt the native event to the shape handleKeyDown expects.
+      const synthetic = {
+        key: event.key,
+        code: event.code,
+        preventDefault: () => event.preventDefault(),
+      } as unknown as KeyboardEvent<HTMLDivElement>;
+
+      const result = snap.handleKeyDown(synthetic);
+
+      if (result === 'reset-round') {
+        snap.resetEngine();
+        snap.onResetRound();
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return {
     index,
     buffer,
@@ -209,6 +296,9 @@ export function useTypingEngine(tokens: Entry[]): UseTypingEngineResult {
     completedKanaLength,
     wpm,
     accuracy,
+    hasFailedOnce,
+    targetRevealed,
+    revealTarget,
     resetEngine,
     handleKeyDown,
   };

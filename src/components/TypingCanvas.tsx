@@ -1,11 +1,7 @@
 import {
   memo,
-  useCallback,
   useEffect,
   useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
 } from 'react';
 import type { Entry } from '../constants/kanaGroups';
 
@@ -17,7 +13,12 @@ type TypingCanvasProps = {
   currentWrong: boolean;
   isFinished: boolean;
   accuracy: number;
-  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  hasFailedOnce: boolean;
+  targetRevealed: boolean;
+  revealTarget: () => void;
+  inputZoneRef: React.RefObject<HTMLDivElement | null>;
+  isFocused: boolean;
+  setIsFocused: (v: boolean) => void;
 };
 
 type KanaTokenProps = {
@@ -53,13 +54,13 @@ function TypingCanvas({
   currentWrong,
   isFinished,
   accuracy,
-  onKeyDown,
+  hasFailedOnce,
+  targetRevealed,
+  revealTarget,
   inputZoneRef,
+  isFocused,
   setIsFocused,
-  isFocused
-}: TypingCanvasProps & { inputZoneRef: React.RefObject<HTMLDivElement | null>, setIsFocused: (v: boolean) => void, isFocused: boolean }) {
-
-
+}: TypingCanvasProps) {
   const activeRomaji = useMemo(() => {
     if (isFinished || !tokens[index]) {
       return '';
@@ -71,39 +72,11 @@ function TypingCanvas({
   const typedGhost = activeRomaji.slice(0, Math.min(buffer.length, activeRomaji.length));
   const pendingGhost = activeRomaji.slice(Math.min(buffer.length, activeRomaji.length));
 
-  const [hasFailedOnce, setHasFailedOnce] = useState(false);
-  const [targetRevealed, setTargetRevealed] = useState(false);
-
+  // Auto-focus the input zone on mount so the window listener immediately
+  // registers visible focus state.
   useEffect(() => {
-    setHasFailedOnce(false);
-    setTargetRevealed(false);
-  }, [index]);
-
-  useEffect(() => {
-    if (currentWrong) {
-      setHasFailedOnce(true);
-    }
-  }, [currentWrong]);
-
-  const focusInput = useCallback(() => {
     inputZoneRef?.current?.focus();
   }, [inputZoneRef]);
-
-  useEffect(() => {
-    focusInput();
-  }, [focusInput]);
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.code === 'Space' && hasFailedOnce && !targetRevealed) {
-        event.preventDefault();
-        setTargetRevealed(true);
-        return;
-      }
-      onKeyDown(event);
-    },
-    [hasFailedOnce, targetRevealed, onKeyDown],
-  );
 
   return (
     <div className="relative">
@@ -113,7 +86,6 @@ function TypingCanvas({
         data-testid="input-zone"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        onKeyDown={handleKeyDown}
         className="relative mb-6 min-h-[17rem] rounded-2xl border border-white/10 bg-black/30 p-8 outline-none transition focus:border-white/30 sm:p-10"
       >
         <div className={`transition duration-150 ${isFocused ? 'opacity-100 blur-0' : 'opacity-70 blur-[1.2px]'}`}>
@@ -155,7 +127,7 @@ function TypingCanvas({
             ) : hasFailedOnce ? (
               <button
                 type="button"
-                onClick={() => setTargetRevealed(true)}
+                onClick={revealTarget}
                 className="animate-pulse rounded px-2 py-0.5 text-xs font-medium text-orange-400 ring-1 ring-orange-400/50 transition hover:text-orange-300 hover:ring-orange-300/70"
               >
                 Reveal target <span className="opacity-60">[Spacebar]</span>
@@ -172,7 +144,7 @@ function TypingCanvas({
         <button
           type="button"
           onMouseDown={(event) => event.preventDefault()}
-          onClick={focusInput}
+          onClick={() => inputZoneRef?.current?.focus()}
           tabIndex={0}
           className="absolute inset-0 z-20 rounded-2xl bg-black/50 text-sm font-semibold uppercase tracking-[0.14em] text-ink-100"
         >
