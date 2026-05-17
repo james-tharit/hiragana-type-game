@@ -1,9 +1,17 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { GROUPS } from '../constants/kanaGroups';
-import App from '../App';
+import { AppRoutes } from '../routes/AppRoutes';
 
-const renderApp = () => render(<MemoryRouter><App /></MemoryRouter>);
+const renderApp = () =>
+  render(
+    <HelmetProvider>
+      <MemoryRouter initialEntries={['/practice']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </HelmetProvider>,
+  );
 
 describe('Character filter selection logic', () => {
   it('selects and de-selects ka-ko', () => {

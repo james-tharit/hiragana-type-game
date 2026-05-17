@@ -30,9 +30,9 @@ describe('PracticePage', () => {
       expect(screen.getByTestId('input-zone')).toBeInTheDocument();
     });
 
-    it('renders the New Round button', () => {
+    it('renders the Restart button', () => {
       renderPage();
-      expect(screen.getByRole('button', { name: /new round/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /restart/i })).toBeInTheDocument();
     });
   });
 
@@ -59,9 +59,9 @@ describe('PracticePage', () => {
   });
 
   describe('new round', () => {
-    it('clicking New Round keeps the input zone mounted', () => {
+    it('clicking Restart keeps the input zone mounted', () => {
       renderPage();
-      fireEvent.click(screen.getByRole('button', { name: /new round/i }));
+      fireEvent.click(screen.getByRole('button', { name: /restart/i }));
       expect(screen.getByTestId('input-zone')).toBeInTheDocument();
     });
 

@@ -25,9 +25,11 @@ describe('ArcadePage', () => {
       expect(screen.getByRole('button', { name: /show filters/i })).toBeInTheDocument();
     });
 
-    it('renders the arcade canvas placeholder', () => {
+    it('renders the arcade game canvas', () => {
       renderPage();
-      expect(screen.getByText(/arcade canvas coming soon/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole('img', { name: /hiragana endless runner/i }),
+      ).toBeInTheDocument();
     });
   });
 
