@@ -28,6 +28,9 @@ export function CommonNav() {
           <NavLink to="/arcade" className={navLinkClass}>
             Arcade
           </NavLink>
+          <NavLink to="/kana" className={navLinkClass}>
+            Chart
+          </NavLink>
         </div>
 
         {/* Utility links */}

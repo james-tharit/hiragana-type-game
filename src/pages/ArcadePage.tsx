@@ -63,12 +63,21 @@ export function ArcadePage() {
   return (
     <>
       <Helmet>
-        <title>Wakana Type | Arcade Mode</title>
+        <title>Hiragana Arcade Games — Wakana Type</title>
         <meta
           name="description"
-          content="Challenge yourself with Arcade Mode — type kana to keep the bird airborne."
+          content="Control browser mini-games by typing hiragana. Type the correct romaji to keep the T-Rex running. Learn Japanese while you play — free, no install."
         />
         <link rel="canonical" href={`${SITE_URL}/arcade`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/arcade`} />
+        <meta property="og:title" content="Hiragana Arcade Games — Wakana Type" />
+        <meta property="og:description" content="Control browser mini-games by typing hiragana. Type romaji to keep the T-Rex running. Free, no install." />
+        <meta property="og:image" content={`${SITE_URL}/og-arcade.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Hiragana Arcade Games — Wakana Type" />
+        <meta name="twitter:description" content="Control browser mini-games by typing hiragana. Type romaji to keep the T-Rex running." />
+        <meta name="twitter:image" content={`${SITE_URL}/og-arcade.png`} />
       </Helmet>
 
       <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">

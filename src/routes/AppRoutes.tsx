@@ -4,6 +4,7 @@ import { CommonNav } from '../components/CommonNav';
 import { GROUPS } from '../constants/kanaGroups';
 import { FilterProvider } from '../contexts/FilterContext';
 import { ArcadePage } from '../pages/ArcadePage';
+import { KanaIndexPage } from '../pages/KanaIndexPage';
 import { PracticePage } from '../pages/PracticePage';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
@@ -26,12 +27,18 @@ function AboutPage() {
   return (
     <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-3xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
       <Helmet>
-        <title>About Wakana Type</title>
+        <title>About Wakana Type — Hiragana Typing Trainer</title>
         <meta
           name="description"
-          content="Learn how Wakana Type helps improve Japanese hiragana input accuracy by tracking mistakes and consistency."
+          content="Learn how Wakana Type helps improve Japanese hiragana input accuracy by tracking mistakes and building consistent romaji-to-kana habits."
         />
         <link rel="canonical" href={`${SITE_URL}/about`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/about`} />
+        <meta property="og:title" content="About Wakana Type — Hiragana Typing Trainer" />
+        <meta property="og:description" content="Wakana Type tracks your mistakes per character so you drill only what you miss. Free, browser-based, no sign-up." />
+        <meta property="og:image" content={`${SITE_URL}/og-practice.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">About</h1>
@@ -61,15 +68,24 @@ function GroupPage() {
     return <Navigate to="/practice" replace />;
   }
 
+  const romajiList = group.entries.map((e) => e.romaji).join(', ');
+  const kanaList   = group.entries.map((e) => e.kana).join(' ');
+
   return (
     <>
       <Helmet>
-        <title>{`${group.label} | Wakana Type`}</title>
+        <title>{`${group.label} Hiragana Practice (${romajiList}) — Wakana Type`}</title>
         <meta
           name="description"
-          content={`Practice the ${group.label} kana set with focused typing drills and live performance stats.`}
+          content={`Type ${romajiList} to match ${kanaList}. Drill the ${group.label} hiragana row with instant accuracy feedback — free browser practice, no install.`}
         />
         <link rel="canonical" href={`${SITE_URL}/group/${id}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/group/${id}`} />
+        <meta property="og:title" content={`${group.label} Hiragana Practice — Wakana Type`} />
+        <meta property="og:description" content={`Type ${romajiList} to match ${kanaList}. Drill the ${group.label} row with instant accuracy feedback.`} />
+        <meta property="og:image" content={`${SITE_URL}/og-practice.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <PracticePage />
     </>
@@ -83,6 +99,7 @@ export function AppRoutes() {
         <Route path="/" element={<Navigate to="/practice" replace />} />
         <Route path="/practice" element={<PracticePage />} />
         <Route path="/arcade" element={<ArcadePage />} />
+        <Route path="/kana" element={<KanaIndexPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/group/:id" element={<GroupPage />} />
         <Route path="*" element={<Navigate to="/practice" replace />} />

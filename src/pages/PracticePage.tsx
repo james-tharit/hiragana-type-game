@@ -87,12 +87,21 @@ export function PracticePage() {
   return (
     <>
       <Helmet>
-        <title>Wakana Type | Practice Kana</title>
+        <title>Hiragana Typing Practice — Wakana Type</title>
         <meta
           name="description"
-          content="Practice Japanese hiragana typing with real-time accuracy metrics."
+          content="Practice all 46 hiragana by kana row. Type romaji, track your accuracy, and drill your weakest characters. Free browser trainer — no sign-up required."
         />
         <link rel="canonical" href={`${SITE_URL}/practice`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/practice`} />
+        <meta property="og:title" content="Hiragana Typing Practice — Wakana Type" />
+        <meta property="og:description" content="Practice all 46 hiragana by kana row. Track accuracy and drill your weakest characters. Free, no sign-up." />
+        <meta property="og:image" content={`${SITE_URL}/og-practice.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Hiragana Typing Practice — Wakana Type" />
+        <meta name="twitter:description" content="Practice all 46 hiragana by kana row. Track accuracy and drill your weakest characters." />
+        <meta name="twitter:image" content={`${SITE_URL}/og-practice.png`} />
       </Helmet>
 
       <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
