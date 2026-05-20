@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
       - name: Pull Vercel environment
         # 2. Reference secrets specifically from the environment
         run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}

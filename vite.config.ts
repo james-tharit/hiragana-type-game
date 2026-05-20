@@ -38,6 +38,12 @@ export default defineConfig(async () => {
         reporter: ['text', 'html', 'lcov'],
         include: ['src/**/*.{ts,tsx}'],
         exclude: ['src/main.tsx', 'src/vite-env.d.ts'],
+        thresholds: {
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
+        },
       },
     },
   };
