@@ -186,6 +186,8 @@ export interface DinoGameCanvasProps {
 export const DinoGameCanvas = forwardRef<DinoGameCanvasHandle, DinoGameCanvasProps>(
   function DinoGameCanvas({ pool, onGameOver, className }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const jumpSoundRef = useRef<HTMLAudioElement>(new Audio('/jump.mp3'));
+    const deathSoundRef = useRef<HTMLAudioElement>(new Audio('/die.mp3'));
 
     // These refs let the RAF loop always read the latest prop values without
     // restarting the loop (and resetting game state) on every prop change.
@@ -214,13 +216,23 @@ export const DinoGameCanvas = forwardRef<DinoGameCanvasHandle, DinoGameCanvasPro
           const s = stateRef.current;
           const c = configRef.current;
           if (!s || !c || s.isOver) return false;
-          return engineResolveTypedWord(s, c, romaji);
+          const prevState = s.player.state;
+          const result = engineResolveTypedWord(s, c, romaji);
+          if (result && prevState !== 'jumping' && s.player.state === 'jumping') {
+            const snd = jumpSoundRef.current;
+            snd.currentTime = 0;
+            snd.play().catch(() => {});
+          }
+          return result;
         },
 
         triggerJump() {
           const s = stateRef.current;
           if (!s || s.isOver) return;
           engineTriggerJump(s);
+          const snd = jumpSoundRef.current;
+          snd.currentTime = 0;
+          snd.play().catch(() => {});
         },
 
         triggerDuck() {
@@ -289,6 +301,9 @@ export const DinoGameCanvas = forwardRef<DinoGameCanvasHandle, DinoGameCanvasPro
 
           if (result.collided && !gameOverFired) {
             gameOverFired = true;
+            const dsnd = deathSoundRef.current;
+            dsnd.currentTime = 0;
+            dsnd.play().catch(() => {});
             onGameOverRef.current?.(state.score);
           }
         }
