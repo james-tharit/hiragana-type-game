@@ -285,30 +285,32 @@ export function triggerDuck(state: GameState, config: GameConfig): void {
  * Primary integration point for the typing engine.
  *
  * Call this whenever the typing engine signals that a full romaji syllable has
- * been completed. This function:
- *  1. Finds the *nearest* (leftmost x) obstacle whose `romajiTarget` matches.
- *  2. Fires `triggerJump` for ground obstacles or `triggerDuck` for air ones.
- *  3. Returns `true` if an action was dispatched, `false` if no match was found.
- *
- * Picking the nearest match prevents a queued word from accidentally skipping
- * past the closest threat to interact with a far-away obstacle.
+ * been completed. This function enforces **strict encounter ordering**:
+ *  1. Finds the single nearest (smallest x) obstacle on screen.
+ *  2. Returns `false` immediately if `completedRomaji` does not match that
+ *     obstacle's `romajiTarget` — the player must address obstacles in the
+ *     order they approach, with no skipping allowed.
+ *  3. Fires `triggerJump` for ground obstacles or `triggerDuck` for air ones.
+ *  4. Returns `true` when an action was dispatched.
  */
 export function resolveTypedWord(
   state: GameState,
   config: GameConfig,
   completedRomaji: string,
 ): boolean {
-  let nearest: Obstacle | undefined;
+  if (state.obstacles.length === 0) return false;
 
+  // Strict sequencing: only the nearest obstacle can be interacted with.
+  // This prevents the player from typing the romaji of a far obstacle while
+  // a closer obstacle with a different romaji is still approaching.
+  let nearest = state.obstacles[0];
   for (const obs of state.obstacles) {
-    if (obs.romajiTarget === completedRomaji) {
-      if (!nearest || obs.x < nearest.x) {
-        nearest = obs;
-      }
+    if (obs.x < nearest.x) {
+      nearest = obs;
     }
   }
 
-  if (!nearest) return false;
+  if (nearest.romajiTarget !== completedRomaji) return false;
 
   if (nearest.type === 'ground') {
     triggerJump(state);

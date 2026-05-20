@@ -204,7 +204,7 @@ describe('resolveTypedWord', () => {
     return state;
   }
 
-  it('returns false when no obstacle matches the completed romaji', () => {
+  it('returns false when there are no obstacles on screen', () => {
     const state = freshState();
     expect(resolveTypedWord(state, CONFIG, 'a')).toBe(false);
   });
@@ -224,7 +224,14 @@ describe('resolveTypedWord', () => {
     expect(state.player.state).toBe('ducking');
   });
 
-  it('picks the nearest (smallest x) obstacle when multiple match', () => {
+  it('returns false when the typed romaji does not match the nearest obstacle', () => {
+    const state = stateWithObstacle('ground', 'ka');
+    // The only (and therefore nearest) obstacle wants 'ka'; typing 'a' is rejected
+    expect(resolveTypedWord(state, CONFIG, 'a')).toBe(false);
+    expect(state.player.state).toBe('running');
+  });
+
+  it('uses the nearest obstacle overall when multiple obstacles share the same romaji', () => {
     const state = freshState();
     // Two ground obstacles with the same romaji; near one is at x=100, far at x=400
     state.obstacles.push(
@@ -232,17 +239,58 @@ describe('resolveTypedWord', () => {
       { id: 1, x: 100, y: CONFIG.groundY - CACTUS_H, width: CACTUS_W, height: CACTUS_H, type: 'ground', wordTarget: 'あ', romajiTarget: 'a' },
     );
 
-    // Should interact with x=100 obstacle (jump dispatched)
+    // Nearest is x=100 with romaji 'a' — should match and jump
     const result = resolveTypedWord(state, CONFIG, 'a');
     expect(result).toBe(true);
     expect(state.player.state).toBe('jumping');
   });
 
-  it('ignores obstacles whose romaji does not match', () => {
-    const state = stateWithObstacle('ground', 'ka');
-    // typing 'a' should not match 'ka'
-    expect(resolveTypedWord(state, CONFIG, 'a')).toBe(false);
-    expect(state.player.state).toBe('running');
+  describe('strict encounter ordering', () => {
+    it('rejects input that matches a far obstacle when a nearer obstacle has a different romaji', () => {
+      const state = freshState();
+      // Nearest: 'ka' cactus at x=100 — player must handle this first
+      // Far:     'a'  cactus at x=300 — cannot be skipped to
+      state.obstacles.push(
+        { id: 0, x: 100, y: CONFIG.groundY - CACTUS_H, width: CACTUS_W, height: CACTUS_H, type: 'ground', wordTarget: 'か', romajiTarget: 'ka' },
+        { id: 1, x: 300, y: CONFIG.groundY - CACTUS_H, width: CACTUS_W, height: CACTUS_H, type: 'ground', wordTarget: 'あ', romajiTarget: 'a' },
+      );
+
+      // Typing 'a' should be rejected — the nearest obstacle expects 'ka'
+      const result = resolveTypedWord(state, CONFIG, 'a');
+      expect(result).toBe(false);
+      expect(state.player.state).toBe('running');
+    });
+
+    it('accepts input after the nearest obstacle has been addressed', () => {
+      const state = freshState();
+      state.obstacles.push(
+        { id: 0, x: 100, y: CONFIG.groundY - CACTUS_H, width: CACTUS_W, height: CACTUS_H, type: 'ground', wordTarget: 'か', romajiTarget: 'ka' },
+        { id: 1, x: 300, y: CONFIG.groundY - CACTUS_H, width: CACTUS_W, height: CACTUS_H, type: 'ground', wordTarget: 'あ', romajiTarget: 'a' },
+      );
+
+      // Address the nearest 'ka' obstacle first
+      expect(resolveTypedWord(state, CONFIG, 'ka')).toBe(true);
+      expect(state.player.state).toBe('jumping');
+
+      // Now remove the handled obstacle (simulating it scrolling off)
+      state.obstacles.shift();
+      state.player.state = 'running'; // reset for test clarity
+
+      // The 'a' obstacle at x=300 is now nearest — typing 'a' should work
+      expect(resolveTypedWord(state, CONFIG, 'a')).toBe(true);
+    });
+
+    it('rejects input for a far air obstacle when a nearer ground obstacle must be jumped first', () => {
+      const state = freshState();
+      state.obstacles.push(
+        { id: 0, x: 150, y: CONFIG.groundY - CACTUS_H, width: CACTUS_W, height: CACTUS_H, type: 'ground', wordTarget: 'き', romajiTarget: 'ki' },
+        { id: 1, x: 350, y: 100, width: BIRD_W, height: BIRD_H, type: 'air', wordTarget: 'う', romajiTarget: 'u' },
+      );
+
+      // Typing 'u' (duck) is rejected while 'ki' (jump) is the nearest threat
+      expect(resolveTypedWord(state, CONFIG, 'u')).toBe(false);
+      expect(state.player.state).toBe('running');
+    });
   });
 });
 
