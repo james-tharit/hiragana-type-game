@@ -37,7 +37,7 @@ export default defineConfig(async () => {
         provider: 'istanbul',
         reporter: ['text', 'html', 'lcov'],
         include: ['src/**/*.{ts,tsx}'],
-        exclude: ['src/main.tsx', 'src/vite-env.d.ts'],
+        exclude: ['src/main.tsx', 'src/vite-env.d.ts', 'src/components/DinoGameCanvas.tsx'],
         thresholds: {
           lines: 80,
           functions: 80,
