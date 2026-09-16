@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { DEFAULT_GROUPS, GROUPS } from '../constants/kanaGroups';
+import { DEFAULT_GROUPS, GROUPS, type Script } from '../constants/kanaGroups';
 
 type FilterContextValue = {
   selectedGroupIds: string[];
@@ -7,12 +7,15 @@ type FilterContextValue = {
   toggleGroup: (groupId: string) => void;
   toggleAllGroups: () => void;
   toggleGroupFamily: (familyGroupIds: string[]) => void;
+  script: Script;
+  setScript: (script: Script) => void;
 };
 
 const FilterContext = createContext<FilterContextValue | null>(null);
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>(DEFAULT_GROUPS);
+  const [script, setScript] = useState<Script>('hiragana');
   const allGroupIds = useMemo(() => GROUPS.map((g) => g.id), []);
 
   const toggleGroup = useCallback((groupId: string) => {
@@ -36,7 +39,15 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <FilterContext.Provider
-      value={{ selectedGroupIds, allGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily }}
+      value={{
+        selectedGroupIds,
+        allGroupIds,
+        toggleGroup,
+        toggleAllGroups,
+        toggleGroupFamily,
+        script,
+        setScript,
+      }}
     >
       {children}
     </FilterContext.Provider>

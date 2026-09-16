@@ -3,6 +3,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { GROUPS } from '../constants/kanaGroups';
 import { AppRoutes } from '../routes/AppRoutes';
+import CharacterFilter from './CharacterFilter';
+
+const noop = () => {};
 
 const renderApp = () =>
   render(
@@ -79,6 +82,42 @@ describe('Character filter selection logic', () => {
     for (const span of kanaSpans) {
       expect(digraphsKana.has(span.textContent!)).toBe(true);
     }
+  });
+});
+
+describe('CharacterFilter script selector', () => {
+  const renderFilter = (script: 'hiragana' | 'katakana', onScriptChange = noop) =>
+    render(
+      <CharacterFilter
+        groups={GROUPS}
+        selectedGroupIds={[]}
+        targetKanaLength={0}
+        onToggleGroup={noop}
+        onToggleAllGroups={noop}
+        onToggleGroupFamily={noop}
+        script={script}
+        onScriptChange={onScriptChange}
+      />,
+    );
+
+  it('renders both script labels', () => {
+    renderFilter('hiragana');
+    expect(screen.getByRole('button', { name: 'Hiragana' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Katakana' })).toBeTruthy();
+  });
+
+  it('marks only the current script as pressed', () => {
+    renderFilter('hiragana');
+    expect(screen.getByRole('button', { name: 'Hiragana' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Katakana' }).getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('calls onScriptChange with the clicked script', () => {
+    const onScriptChange = vi.fn();
+    renderFilter('hiragana', onScriptChange);
+    fireEvent.click(screen.getByRole('button', { name: 'Katakana' }));
+    expect(onScriptChange).toHaveBeenCalledTimes(1);
+    expect(onScriptChange).toHaveBeenCalledWith('katakana');
   });
 });
 

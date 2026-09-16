@@ -1,8 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import { HelmetProvider } from 'react-helmet-async';
 import { DEFAULT_GROUPS, GROUPS } from '../constants/kanaGroups';
 import { FilterProvider, useFilterContext } from '../contexts/FilterContext';
 import { ArcadePage } from './ArcadePage';
+import type { WordEntry } from '../game/engine';
+
+let capturedPool: readonly WordEntry[] = [];
+
+vi.mock('../components/DinoGameCanvas', () => ({
+  DinoGameCanvas: (props: { pool: readonly WordEntry[] }) => {
+    capturedPool = props.pool;
+    return <div role="img" aria-label="hiragana endless runner" />;
+  },
+}));
 
 const renderPage = () =>
   render(
@@ -85,6 +96,17 @@ describe('ArcadePage', () => {
       // The shared context state no longer includes 'ka-ko'
       const updated: string[] = JSON.parse(screen.getByTestId('shared-ids').textContent!);
       expect(updated).not.toContain('ka-ko');
+    });
+  });
+
+  describe('script selection', () => {
+    it('displays katakana kana in the pool while keeping romaji unchanged', () => {
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: 'Katakana' }));
+
+      const entry = capturedPool.find((e) => e.romaji === 'a');
+      expect(entry?.kana).toBe('ア');
+      expect(entry?.romaji).toBe('a');
     });
   });
 });

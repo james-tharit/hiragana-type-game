@@ -121,7 +121,38 @@ describe('FilterContext', () => {
     });
   });
 
-  describe('error boundary', () => {
+  describe('script', () => {
+  function ScriptConsumer() {
+    const { script, setScript } = useFilterContext();
+    return (
+      <div>
+        <p data-testid="script">{script}</p>
+        <button onClick={() => setScript('katakana')}>set katakana</button>
+      </div>
+    );
+  }
+
+  it('defaults to hiragana', () => {
+    render(
+      <FilterProvider>
+        <ScriptConsumer />
+      </FilterProvider>,
+    );
+    expect(screen.getByTestId('script').textContent).toBe('hiragana');
+  });
+
+  it('updates script when setScript is called', () => {
+    render(
+      <FilterProvider>
+        <ScriptConsumer />
+      </FilterProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'set katakana' }));
+    expect(screen.getByTestId('script').textContent).toBe('katakana');
+  });
+});
+
+describe('error boundary', () => {
     it('throws when useFilterContext is called outside FilterProvider', () => {
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
       expect(() => render(<Consumer />)).toThrow(
