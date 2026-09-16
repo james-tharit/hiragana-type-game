@@ -10,7 +10,8 @@ import { useTypingEngine } from '../hooks/useTypingEngine';
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
 export function PracticePage() {
-  const { selectedGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily } = useFilterContext();
+  const { selectedGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily, script, setScript } =
+    useFilterContext();
 
   const inputZoneRef = useRef<HTMLDivElement | null>(null);
   const [isFocused, setIsFocused] = useState(true);
@@ -129,11 +130,14 @@ export function PracticePage() {
             onToggleGroup={toggleGroup}
             onToggleAllGroups={toggleAllGroups}
             onToggleGroupFamily={toggleGroupFamily}
+            script={script}
+            onScriptChange={setScript}
           />
 
           <div className="relative">
             <TypingCanvas
               tokens={tokens}
+              script={script}
               index={index}
               buffer={buffer}
               composedKana={composedKana}

@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react';
-import type { Group } from '../constants/kanaGroups';
+import type { Group, Script } from '../constants/kanaGroups';
+
+const SCRIPT_OPTIONS: { value: Script; label: string }[] = [
+  { value: 'hiragana', label: 'Hiragana' },
+  { value: 'katakana', label: 'Katakana' },
+];
 
 type CharacterFilterProps = {
   groups: Group[];
@@ -8,6 +13,8 @@ type CharacterFilterProps = {
   onToggleGroup: (groupId: string) => void;
   onToggleAllGroups: () => void;
   onToggleGroupFamily: (groupIds: string[]) => void;
+  script: Script;
+  onScriptChange: (script: Script) => void;
 };
 
 function CharacterFilter({
@@ -17,6 +24,8 @@ function CharacterFilter({
   onToggleGroup,
   onToggleAllGroups,
   onToggleGroupFamily,
+  script,
+  onScriptChange,
 }: CharacterFilterProps) {
   const [isFolded, setIsFolded] = useState(true);
 
@@ -67,6 +76,27 @@ function CharacterFilter({
             {isFolded ? 'Show filters' : 'Hide filters'}
           </button>
         </div>
+      </div>
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {SCRIPT_OPTIONS.map((option) => {
+          const active = script === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onScriptChange(option.value)}
+              className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+                active
+                  ? 'border-ink-100 bg-ink-100 text-ink-950'
+                  : 'border-white/20 bg-white/5 text-ink-500 hover:bg-white/10 hover:text-ink-100'
+              }`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
 
       {isFolded && (

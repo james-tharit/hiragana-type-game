@@ -20,6 +20,7 @@ describe('TypingCanvas', () => {
         hasFailedOnce: false,
         targetRevealed: false,
         revealTarget: vi.fn(),
+        script: 'hiragana' as const,
     };
 
     function FocusHarness() {
@@ -54,5 +55,27 @@ describe('TypingCanvas', () => {
             expect(inputZone).toHaveFocus();
         });
     })
+
+    describe('script rendering', () => {
+        const tokens = [
+            { kana: 'あ', romaji: 'a' },
+            { kana: 'か', romaji: 'ka' },
+        ] as Entry[];
+
+        it('renders tokens in katakana when script is katakana', () => {
+            render(<TypingCanvas {...baseProps} tokens={tokens} script="katakana" inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.getByText('ア')).toBeInTheDocument();
+            expect(screen.getByText('カ')).toBeInTheDocument();
+        });
+
+        it('updates displayed tokens when script switches on an already-rendered canvas', () => {
+            const { rerender } = render(<TypingCanvas {...baseProps} tokens={tokens} script="hiragana" inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.getByText('あ')).toBeInTheDocument();
+
+            rerender(<TypingCanvas {...baseProps} tokens={tokens} script="katakana" inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.getByText('ア')).toBeInTheDocument();
+            expect(screen.queryByText('あ')).not.toBeInTheDocument();
+        });
+    });
 
 });

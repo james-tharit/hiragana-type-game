@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import CharacterFilter from '../components/CharacterFilter';
-import { GROUPS } from '../constants/kanaGroups';
+import { GROUPS, displayFor } from '../constants/kanaGroups';
 import { useFilterContext } from '../contexts/FilterContext';
 import { DinoGameCanvas, type DinoGameCanvasHandle } from '../components/DinoGameCanvas';
 import type { WordEntry } from '../game/engine';
@@ -9,7 +9,8 @@ import type { WordEntry } from '../game/engine';
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
 export function ArcadePage() {
-  const { selectedGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily } = useFilterContext();
+  const { selectedGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily, script, setScript } =
+    useFilterContext();
   const gameRef = useRef<DinoGameCanvasHandle>(null);
 
   // Count individual kana entries across selected groups for the filter summary.
@@ -24,8 +25,11 @@ export function ArcadePage() {
 
   // Flat pool of kana entries for the currently selected groups.
   const pool = useMemo<WordEntry[]>(
-    () => GROUPS.filter((g) => selectedGroupIds.includes(g.id)).flatMap((g) => g.entries),
-    [selectedGroupIds],
+    () =>
+      GROUPS.filter((g) => selectedGroupIds.includes(g.id))
+        .flatMap((g) => g.entries)
+        .map((entry) => ({ kana: displayFor(entry.kana, script), romaji: entry.romaji })),
+    [selectedGroupIds, script],
   );
 
   // Romaji typing buffer — accumulates keystrokes and fires into the game
@@ -98,6 +102,8 @@ export function ArcadePage() {
             onToggleGroup={toggleGroup}
             onToggleAllGroups={toggleAllGroups}
             onToggleGroupFamily={toggleGroupFamily}
+            script={script}
+            onScriptChange={setScript}
           />
 
           <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black/30">

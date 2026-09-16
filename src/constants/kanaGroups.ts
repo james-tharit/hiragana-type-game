@@ -1,7 +1,16 @@
+import { toKatakana } from 'wanakana';
+
 export type Entry = {
   kana: string;
   romaji: string;
 };
+
+export type Script = 'hiragana' | 'katakana';
+
+export function displayFor(kana: string, script: Script): string {
+  if (script === 'katakana') return toKatakana(kana);
+  return kana;
+}
 
 export type Group = {
   id: string;
@@ -299,7 +308,7 @@ export const GROUPS: Group[] = [
   },
 ];
 
-export const DEFAULT_GROUPS = ['a-o', 'ka-ko', 's-line'];
+export const DEFAULT_GROUPS = ['a-o', 'ka-ko', 'sa-so'];
 export const ROUND_SIZE = 30;
 
 export function createRound(groupIds: string[]): Entry[] {

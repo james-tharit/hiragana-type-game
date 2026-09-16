@@ -3,10 +3,12 @@ import {
   useEffect,
   useMemo,
 } from 'react';
-import type { Entry } from '../constants/kanaGroups';
+import { displayFor } from '../constants/kanaGroups';
+import type { Entry, Script } from '../constants/kanaGroups';
 
 type TypingCanvasProps = {
   tokens: Entry[];
+  script: Script;
   index: number;
   buffer: string;
   composedKana: string;
@@ -22,12 +24,12 @@ type TypingCanvasProps = {
 };
 
 type KanaTokenProps = {
-  kana: string;
+  display: string;
   status: 'pending' | 'done' | 'active' | 'error';
 };
 
 const KanaToken = memo(
-  ({ kana, status }: KanaTokenProps) => {
+  ({ display, status }: KanaTokenProps) => {
     const colorClass =
       status === 'done'
         ? 'text-ink-100'
@@ -39,15 +41,16 @@ const KanaToken = memo(
 
     return (
       <span className={`${colorClass} transition-colors duration-150`}>
-        {kana}
+        {display}
       </span>
     );
   },
-  (prev, next) => prev.kana === next.kana && prev.status === next.status,
+  (prev, next) => prev.display === next.display && prev.status === next.status,
 );
 
 function TypingCanvas({
   tokens,
+  script,
   index,
   buffer,
   composedKana,
@@ -61,6 +64,7 @@ function TypingCanvas({
   isFocused,
   setIsFocused,
 }: TypingCanvasProps) {
+  const composedDisplay = displayFor(composedKana, script);
   const activeRomaji = useMemo(() => {
     if (isFinished || !tokens[index]) {
       return '';
@@ -104,7 +108,7 @@ function TypingCanvas({
               return (
                 <KanaToken
                   key={`${token.kana}-${tokenIndex}`}
-                  kana={token.kana}
+                  display={displayFor(token.kana, script)}
                   status={status}
                 />
               );
@@ -116,7 +120,7 @@ function TypingCanvas({
               Romaji: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{buffer || '...'}</span>
             </p>
             <p>
-              Kana: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{composedKana || '...'}</span>
+              Kana: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{composedDisplay || '...'}</span>
             </p>
             {targetRevealed ? (
               <p>
