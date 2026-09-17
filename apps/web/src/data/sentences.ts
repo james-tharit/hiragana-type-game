@@ -45,6 +45,13 @@ export function isSuitable(translation: string): boolean {
 }
 
 const SKIP_RE = /[、。！？ 　]/;
+
+// Shared with furigana.ts: the same rule sentenceToEntries uses to drop a
+// character from the typed mora sequence, needed there to walk a reading in
+// parallel with sentenceToEntries's output.
+export function isSkippedForTyping(ch: string): boolean {
+  return SKIP_RE.test(ch);
+}
 const SMALL_KANA_RE = /[ゃゅょぁぃぅぇぉャュョァィゥェォ]/;
 const SOKUON_RE = /[っッ]/;
 const LONG_VOWEL = 'ー';

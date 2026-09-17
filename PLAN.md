@@ -222,3 +222,98 @@ broken" rather than "the splitter is wrong".
 
 Watch the 80% coverage gate — it fails the Vercel deploy, and `SentencePage`
 plus the new UI will drag the average if their cycles skip tests.
+
+---
+
+## Phase 4 — Kanji sentences with furigana — SHIPPED
+
+Sentence mode currently filters Tatoeba down to kana-only text, which is what
+made it typeable without a reading. Rendering real Japanese inverts that: the
+sentence keeps its kanji, and the *reading* becomes the typing target.
+
+Decisions taken (do not relitigate):
+
+- **kuromoji**, devDependency, refresh-time only. Tatoeba's `jpn_indices.csv`
+  was checked and rejected: its readings only disambiguate dictionary
+  headwords, so common kanji get none (`職場 で の スケジュール を 使用` annotates
+  neither 職場 nor 使用), and the readings it does give are dictionary-form
+  against inflected surface forms. It cannot produce complete furigana.
+- Use kuromoji's `reading`, **never** `pronunciation`. Typing follows spelling:
+  は is typed `ha` (reading ハ), not `wa` (pronunciation ワ); 東京 is `toukyou`
+  (トウキョウ), not `tōkyō` (トーキョー). `pronunciation` would make sentences
+  untypeable.
+- The furigana IS the typing row — one block: kanji base, kana above colouring
+  as you type, English below. Not a static reference line plus a separate row.
+- `useTypingEngine` and the mora splitter stay untouched. A sentence is still
+  `Entry[]`; only where the kana comes from changes.
+
+Data shape becomes `{ id, segments, translation }`, with `segments` a list of
+`{ text, reading? }`. Both the displayed text and the full reading derive from
+it, so nothing can drift out of sync.
+
+### 4.1 `alignFurigana(surface, reading)`
+
+`apps/web/src/data/furigana.ts`. Splits one token so furigana sits over the
+kanji only: 忙しかっ/いそがしかっ → 忙(いそが) + しかっ. Strip the longest common
+kana suffix, then prefix; the remainder is the kanji core.
+
+Ceiling: two kanji runs split by kana (取り出す) get one span over the whole
+core, not per-run furigana.
+
+### 4.2 Mora-to-character mapping
+
+The hazard cycle, and the reason 4.1 is not enough. kuromoji splits mid-word,
+so a token can end in っ (行っ + た) — and since っ attaches to the *following*
+mora, the mora った spans two segments. Per-segment mora counts are therefore
+wrong by construction.
+
+Map at the **character** level instead: every character of the reading carries
+the index of the mora containing it (or null, for punctuation the splitter
+skips). Colouring then works per character and boundaries stop mattering.
+
+### 4.3 Refresh script on kuromoji
+
+Drop `isKanaOnly` as a *filter*; keep it as a *validator* for generated
+readings. Reject any sentence containing a token kuromoji does not know, or
+whose reading is not kana. `isSuitable` stays exactly as is — Tatoeba is still
+unfiltered.
+
+### 4.4 Ruby rendering in `TypingCanvas`
+
+Extend, do not fork: an optional `segments` prop switches the prompt row from
+flat tokens to ruby. Absent, every existing caller renders as it does today.
+
+### 4.5 `SentencePage` wiring
+
+Pass segments; translation moves below the sentence; `speak()` takes the
+derived text.
+
+**Phase 4 done when:** a sentence renders its kanji with furigana above and
+English below, typing its reading advances the colouring, and no test in
+`useTypingEngine.test.ts` changed.
+
+### 4.6 The rule `alignFurigana` actually needed
+
+Shipped with 4.3 and corrected afterwards. The skip condition was "core has no
+kanji", which silently discarded the reading for anything non-kana that does
+not read as itself — `１０` lost じゅう. The refresh script had papered over it
+with a round-trip guard comparing segments against a separately built
+hiragana reading, and that guard quietly threw away nearly every katakana
+sentence, since a katakana segment can never match a hiragana-ised reading.
+
+Fixed at the root: the condition is now "is this all kana", and the script
+derives its reading from the segments instead of building a second one to
+disagree with. Katakana in the committed pool went 3 → 38 of 300.
+
+Pinned by an invariant: at least 15 of the 300 entries must contain katakana,
+so a future change cannot quietly strip loanwords out again.
+
+---
+
+## Known, pre-existing, not addressed
+
+`vite-plugin-prerender` reports every route rendered, but the emitted HTML
+contains only the document title — no rendered markup, on any route. Verified
+against production (built before this work), which shows the same empty shell.
+So the SSG setup is not currently doing what it is there to do. Out of scope
+here; worth its own look.

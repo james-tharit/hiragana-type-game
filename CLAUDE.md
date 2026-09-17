@@ -36,14 +36,45 @@ thin package hide behind a thick one.
    the engine always matches against the underlying hiragana. A romaji *display*
    option was built and then removed as unnecessary; `Entry.romaji` is the typed
    target and is unrelated to it.
-2. **Sentences** — `/sentences`. Whole kana-only sentences sourced from
-   Tatoeba, typed end to end with the English translation shown. Sentences ship
-   as a checked-in JSON file (`apps/web/src/data/sentences.json`, 300 entries) never
+2. **Sentences** — `/sentences`. Real Japanese sentences from Tatoeba, kanji
+   included, rendered as ruby: the kanji as the base, its reading above it
+   colouring in as you type, the English translation below. Sentences ship as a
+   checked-in JSON file (`apps/web/src/data/sentences.json`, 300 entries) never
    fetched at runtime; `npm run sentences:refresh` regenerates it, downloading
-   ~30MB to a temp dir. The script filters for kana-only text, a usable length,
-   and suitability — Tatoeba is unfiltered, so that last filter is not optional.
-   The script is the only way to change that file; hand-editing it makes the
-   filters a lie.
+   ~30MB to a temp dir. The script is the only way to change that file;
+   hand-editing it makes the filters a lie.
+
+   An entry is `{ id, segments, translation }` and **everything else derives
+   from `segments`** — `sentenceText()` for what is displayed, and
+   `sentenceReading()` for what is typed. There is deliberately no stored
+   `text` field: a second copy would drift.
+
+   Readings come from **kuromoji**, at refresh time only, so nothing reaches
+   the bundle. Two rules that are not negotiable:
+
+   - Use kuromoji's `reading`, **never** `pronunciation`. Typing follows
+     spelling: は is typed `ha` (reading ハ) not `wa` (pronunciation ワ), and
+     東京 is `toukyou` not `tōkyō`. `pronunciation` makes sentences untypeable.
+   - Reject any sentence containing a token kuromoji does not know, and any
+     whose generated reading is not kana. `isKanaOnly` stopped being the
+     intake filter and became that validator. `isSuitable` is unchanged and
+     still mandatory — Tatoeba is unfiltered crowd-sourced text.
+
+   A segment keeps a reading unless its text **reads as itself** — that is the
+   rule, not "does it contain kanji". Kana reads as itself and gets no
+   furigana; a numeral or fullwidth latin run does not (`１０` is じゅう), and
+   losing its reading would break the typed stream. Getting this wrong once
+   cost the pool nearly all its katakana sentences.
+
+   IPADIC readings are very good but not perfect (it reads 何 in 「何と言ったら」
+   as なに rather than なん), and they are committed, so an occasional odd
+   reading is expected rather than a bug. It is self-consistent: the reader
+   types what is shown.
+
+   Mora are mapped to reading characters, never counted per segment. kuromoji
+   splits mid-word — 行った becomes 行っ + た — and っ attaches to the
+   *following* mora, so the mora った straddles two segments. Per-segment
+   counts are wrong by construction; `toRubySegments` walks characters instead.
 
    The script selector does not apply here: sentences already mix hiragana and
    katakana, so `SentencePage` passes the identity case.
