@@ -1,3 +1,4 @@
 {
-  "buildCommand": "pnpm build:ssg"
+  "buildCommand": "pnpm build:ssg",
+  "outputDirectory": "apps/web/dist"
 }
