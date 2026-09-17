@@ -11,13 +11,15 @@ export default {
         display: ['Space Grotesk', 'ui-sans-serif', 'system-ui'],
       },
       colors: {
-        ink: {
-          950: '#0a0a0a',
-          900: '#121212',
-          700: '#2a2a2a',
-          500: '#6b6b6b',
-          100: '#f5f5f5',
-        },
+        // colorhunt.co/palette/2a7c1376c457fff8cffbe6c2, plus two derived
+        // neutrals: the palette's four colours alone cannot carry body text
+        // at readable contrast on cream.
+        cream: '#FFF8CF', // page
+        sand: '#FBE6C2', // raised surface
+        moss: '#2A7C13', // primary accent — 4.9:1 on cream
+        leaf: '#76C457', // secondary accent
+        bark: '#16300A', // primary text — 13.4:1 on cream
+        sage: '#4A5C3A', // muted text — 6.8:1 on cream
       },
       keyframes: {
         blink: {

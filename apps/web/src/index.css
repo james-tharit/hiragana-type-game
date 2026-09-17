@@ -5,15 +5,15 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  @apply m-0 min-h-screen bg-ink-950 font-display text-ink-100 antialiased;
+  @apply m-0 min-h-screen bg-cream font-display text-bark antialiased;
   background-image:
-    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.08), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.06), transparent 40%),
-    linear-gradient(170deg, #0a0a0a 0%, #111111 40%, #151515 100%);
+    radial-gradient(circle at 10% 10%, rgba(118, 196, 87, 0.22), transparent 32%),
+    radial-gradient(circle at 90% 80%, rgba(42, 124, 19, 0.14), transparent 42%),
+    linear-gradient(170deg, #FFF8CF 0%, #FDF1C6 45%, #FBE6C2 100%);
 }
 
 * {

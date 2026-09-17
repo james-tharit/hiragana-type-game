@@ -23,18 +23,18 @@ const GROUND_Y = GAME_H - 48; // 224 px — 48 px of visual ground room below
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
 const CLR = {
-  ground: 'rgba(255, 255, 255, 0.1)',
-  playerRun: '#ea580c',
-  playerJump: '#fb923c',
-  playerDuck: '#c2410c',
-  cactus: '#15803d',
-  bird: '#1d4ed8',
-  label: '#f9fafb',
-  score: '#4b5563',
-  overlay: 'rgba(0, 0, 0, 0.58)',
-  overlayTitle: '#f9fafb',
-  overlayScore: '#d1d5db',
-  overlayHint: '#6b7280',
+  ground: 'rgba(42, 124, 19, 0.28)',
+  playerRun: '#2A7C13',
+  playerJump: '#76C457',
+  playerDuck: '#1C5A0C',
+  cactus: '#7A3E12',
+  bird: '#B45309',
+  label: '#FFF8CF',
+  score: '#4A5C3A',
+  overlay: 'rgba(255, 248, 207, 0.88)',
+  overlayTitle: '#16300A',
+  overlayScore: '#2A7C13',
+  overlayHint: '#4A5C3A',
 } as const;
 
 // ─── Drawing (module-level, no React deps, no allocations) ───────────────────
@@ -93,7 +93,7 @@ function drawScene(ctx: CanvasRenderingContext2D, state: GameState): void {
     ctx.textBaseline = 'bottom';
     ctx.fillStyle = CLR.label;
     // Shadow ensures the kanji is legible against any background colour.
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+    ctx.shadowColor = 'rgba(22, 48, 10, 0.9)';
     ctx.shadowBlur = 5;
     ctx.fillText(obs.wordTarget, obs.x + obs.width / 2, obs.y - 6);
     ctx.restore();
@@ -123,7 +123,7 @@ function drawScene(ctx: CanvasRenderingContext2D, state: GameState): void {
 
   ctx.font = "bold 30px 'Noto Sans JP', sans-serif";
   ctx.fillStyle = CLR.overlayTitle;
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+  ctx.shadowColor = 'rgba(22, 48, 10, 0.9)';
   ctx.shadowBlur = 8;
   ctx.fillText('GAME OVER', cx, cy - 22);
 

@@ -62,16 +62,16 @@ function CharacterFilter({
   }, [groups, selectedGroupIds]);
 
   return (
-    <div className="mb-8 rounded-2xl border border-white/10 bg-black/25 p-4">
+    <div className="mb-8 rounded-2xl border border-moss/20 bg-cream/70 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-ink-500">Filter</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-sage">Filter</h2>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-ink-500">Kana in set: {targetKanaLength}</span>
+          <span className="text-xs text-sage">Kana in set: {targetKanaLength}</span>
           <button
             type="button"
             onClick={() => setIsFolded((prev) => !prev)}
             aria-expanded={!isFolded}
-            className="rounded-md border border-white/20 bg-white/5 px-2.5 py-1 text-xs font-medium text-ink-500 transition hover:bg-white/10 hover:text-ink-100"
+            className="rounded-md border border-moss/30 bg-sand/60 px-2.5 py-1 text-xs font-medium text-sage transition hover:bg-sand hover:text-bark"
           >
             {isFolded ? 'Show filters' : 'Hide filters'}
           </button>
@@ -89,8 +89,8 @@ function CharacterFilter({
               onClick={() => onScriptChange(option.value)}
               className={`rounded-lg border px-3 py-1.5 text-sm transition ${
                 active
-                  ? 'border-ink-100 bg-ink-100 text-ink-950'
-                  : 'border-white/20 bg-white/5 text-ink-500 hover:bg-white/10 hover:text-ink-100'
+                  ? 'border-moss bg-moss text-cream'
+                  : 'border-moss/30 bg-sand/60 text-sage hover:bg-sand hover:text-bark'
               }`}
             >
               {option.label}
@@ -100,8 +100,8 @@ function CharacterFilter({
       </div>
 
       {isFolded && (
-        <p className="text-xs text-ink-500">
-          Selected: <span className="text-ink-100">{selectedGroupLabels}</span>
+        <p className="text-xs text-sage">
+          Selected: <span className="text-bark">{selectedGroupLabels}</span>
         </p>
       )}
 
@@ -113,8 +113,8 @@ function CharacterFilter({
               onClick={onToggleAllGroups}
               className={`rounded-lg border px-3 py-1.5 text-sm transition ${
                 allSelected
-                  ? 'border-ink-100 bg-ink-100 text-ink-950'
-                  : 'border-white/20 bg-white/5 text-ink-500 hover:bg-white/10 hover:text-ink-100'
+                  ? 'border-moss bg-moss text-cream'
+                  : 'border-moss/30 bg-sand/60 text-sage hover:bg-sand hover:text-bark'
               }`}
             >
               {allSelected ? 'De-select all' : 'Select all'}
@@ -129,14 +129,14 @@ function CharacterFilter({
               return (
                 <div key={family}>
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-500">{family}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sage">{family}</p>
                     <button
                       type="button"
                       onClick={() => onToggleGroupFamily(familyIds)}
                       className={`rounded-md border px-2.5 py-1 text-xs transition ${
                         familySelected
-                          ? 'border-ink-100 bg-ink-100 text-ink-950'
-                          : 'border-white/20 bg-white/5 text-ink-500 hover:bg-white/10 hover:text-ink-100'
+                          ? 'border-moss bg-moss text-cream'
+                          : 'border-moss/30 bg-sand/60 text-sage hover:bg-sand hover:text-bark'
                       }`}
                     >
                       {familySelected ? 'De-select family' : 'Select family'}
@@ -152,8 +152,8 @@ function CharacterFilter({
                           onClick={() => onToggleGroup(group.id)}
                           className={`rounded-lg border px-3 py-1.5 text-sm transition ${
                             active
-                              ? 'border-ink-100 bg-ink-100 text-ink-950'
-                              : 'border-white/20 bg-white/5 text-ink-500 hover:bg-white/10 hover:text-ink-100'
+                              ? 'border-moss bg-moss text-cream'
+                              : 'border-moss/30 bg-sand/60 text-sage hover:bg-sand hover:text-bark'
                           }`}
                         >
                           {group.label}

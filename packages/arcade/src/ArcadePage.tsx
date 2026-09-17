@@ -84,11 +84,11 @@ export function ArcadePage() {
         <meta name="twitter:image" content={`${SITE_URL}/og-arcade.png`} />
       </Helmet>
 
-      <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+      <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-bark sm:px-8">
+        <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
           <header className="mb-6">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Arcade Mode</h1>
-            <p className="mt-1 text-sm text-ink-500">
+            <p className="mt-1 text-sm text-sage">
               Type the kana to keep the T-Rex airborne. Filters sync with Practice Mode.
             </p>
           </header>
@@ -106,7 +106,7 @@ export function ArcadePage() {
             onScriptChange={setScript}
           />
 
-          <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+          <div className="mt-6 overflow-hidden rounded-2xl border border-moss/20 bg-cream">
             <DinoGameCanvas
               ref={gameRef}
               pool={pool}

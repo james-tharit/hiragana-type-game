@@ -12,22 +12,22 @@ const confettiPalette = ['#22c55e', '#16a34a', '#4ade80', '#facc15', '#f97316', 
 
 function getAccuracyColorClass(accuracy: number, isFinished?: boolean) {
   if (!isFinished) {
-    return 'text-ink-100';
+    return 'text-bark';
   }
 
   if (accuracy < 15) {
-    return 'text-red-400';
+    return 'text-red-700';
   }
 
   if (accuracy < 30) {
-    return 'text-orange-400';
+    return 'text-moss';
   }
 
   if (accuracy > 80) {
     return 'text-green-400';
   }
 
-  return 'text-ink-100';
+  return 'text-bark';
 }
 
 function StatsDisplay({
@@ -72,23 +72,23 @@ function StatsDisplay({
       <section
         className={`mb-6 grid gap-3 text-sm sm:grid-cols-4 transition-all duration-500 ${isFinished ? 'scale-105 opacity-100' : 'scale-95 opacity-0'}`}
       >
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Progress</p>
-          <p className="mt-1 text-lg font-semibold text-ink-100">
+        <div className="rounded-xl border border-moss/20 bg-cream/70 px-4 py-3">
+          <p className="text-xs uppercase tracking-[0.14em] text-sage">Progress</p>
+          <p className="mt-1 text-lg font-semibold text-bark">
             {progress}/{total}
           </p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Accuracy</p>
+        <div className="rounded-xl border border-moss/20 bg-cream/70 px-4 py-3">
+          <p className="text-xs uppercase tracking-[0.14em] text-sage">Accuracy</p>
           <p className={`mt-1 text-lg font-semibold ${accuracyColorClass}`}>{accuracy.toFixed(1)}%</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Mistakes</p>
-          <p className="mt-1 text-lg font-semibold text-ink-100">{mistakeKeystrokes}</p>
+        <div className="rounded-xl border border-moss/20 bg-cream/70 px-4 py-3">
+          <p className="text-xs uppercase tracking-[0.14em] text-sage">Mistakes</p>
+          <p className="mt-1 text-lg font-semibold text-bark">{mistakeKeystrokes}</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.14em] text-ink-500">Keystrokes</p>
-          <p className="mt-1 text-lg font-semibold text-ink-100">{totalKeystrokes}</p>
+        <div className="rounded-xl border border-moss/20 bg-cream/70 px-4 py-3">
+          <p className="text-xs uppercase tracking-[0.14em] text-sage">Keystrokes</p>
+          <p className="mt-1 text-lg font-semibold text-bark">{totalKeystrokes}</p>
         </div>
       </section>
       {isFinished && (
@@ -96,7 +96,7 @@ function StatsDisplay({
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-xl border border-white/20 bg-white/10 px-6 py-2 text-base font-medium text-white transition hover:bg-white/20 shadow-lg"
+            className="rounded-xl border border-moss/30 bg-sand px-6 py-2 text-base font-medium text-bark transition hover:bg-leaf/40 shadow-lg"
           >
             Retry
           </button>
