@@ -310,6 +310,47 @@ so a future change cannot quietly strip loanwords out again.
 
 ---
 
+## Phase 5 — Two actions, one place
+
+The action surface had drifted: the reveal-target button advertised
+`[Spacebar]`, but the binding lived in `useTypingEngine`'s window listener and
+was still gated on `hasFailedOnce` — a gate Phase 3 removed from the button and
+not from the key. So the button rendered from the start and the key it named
+did nothing until you made a mistake.
+
+Collapse it to two actions, both handled in `handleKeyDown` so there is one
+place to read:
+
+- **Space — restart.** Unconditional. The window listener's special-cased
+  Space block goes; handling it in `handleKeyDown` gives both key paths the
+  behaviour for free.
+- **Tab — topline.** Toggles the reading line above the prompt. Tab was
+  previously swallowed and did nothing.
+
+`targetRevealed`/`revealTarget` become `toplineVisible`/`toggleTopline`,
+because the concept changed: it is a two-way toggle of a reading line, not a
+one-way reveal of a romaji target. `hasFailedOnce` loses its last consumer and
+is deleted.
+
+### The topline means something in both modes
+
+Sentences already have one — the furigana. Practice gets the equivalent:
+romaji above each kana, rendered through the SAME `<ruby>`/`<rt>` mechanism
+rather than a second mechanism that happens to look similar.
+
+Defaults differ per mode on purpose, and it is not config for its own sake:
+furigana is a reading aid for kanji you otherwise cannot read, so Sentences
+start with it ON; romaji over kana is the answer key, so Practice starts OFF.
+Hence `initialToplineVisible` is a parameter rather than a constant, and
+`resetEngine` restores it rather than forcing false.
+
+### The row below the canvas
+
+Exactly two action buttons — Restart [Space], Furigana [Tab] — with the live
+Romaji / Kana / Accuracy readouts kept beside them as passive feedback.
+
+---
+
 ## Known, pre-existing, not addressed
 
 `vite-plugin-prerender` reports every route rendered, but the emitted HTML

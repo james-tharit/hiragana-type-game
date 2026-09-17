@@ -79,17 +79,42 @@ thin package hide behind a thick one.
    The script selector does not apply here: sentences already mix hiragana and
    katakana, so `SentencePage` passes the identity case.
 
-   Study aids: the translation starts hidden behind a toggle (reading the
-   English first defeats the exercise) and resets to hidden on every new
-   sentence; a Listen button reads the Japanese aloud via `apps/web/src/lib/speech.ts`,
-   a thin wrapper over the browser's `SpeechSynthesis`. That button is absent
-   — not disabled — when no Japanese voice exists, which is the normal case on
-   Linux. A romaji hint for the current mora is available from the start in
-   both modes (it used to unlock only after a mistake).
+   Study aids: the translation sits below the sentence and starts VISIBLE,
+   with a toggle to hide it, resetting to visible on every new sentence. A
+   Listen button reads the Japanese aloud via `apps/web/src/lib/speech.ts`, a
+   thin wrapper over the browser's `SpeechSynthesis`. That button is absent —
+   not disabled — when no Japanese voice exists, which is the normal case on
+   Linux.
+
+   Skip and Restart are different things here: Skip loads a new sentence,
+   Restart retries the current one. `SentencePage` therefore passes no
+   `onResetRound` — the engine resets itself and the sentence simply stays.
 
 `/arcade` (T-Rex runner driven by typed kana) and `/kana` (reference chart) are
 additional surfaces built on the same kana pool, not game modes in their own
 right.
+
+## The canvas has exactly two actions
+
+Both live in `useTypingEngine`'s `handleKeyDown`, which is the ONE place key
+handling belongs — the window listener only adapts a native event and forwards
+it. Do not add a second key path; that split is what let the reveal button
+advertise `[Spacebar]` while the key itself stayed gated on a flag the button
+had already stopped using.
+
+- **Space — restart.** Whatever a round reset means for that page.
+- **Tab — topline.** Toggles the reading line above the prompt.
+
+The topline is one concept with one mechanism (`<ruby>`/`<rt>`), not two
+lookalikes: furigana over kanji in Sentences, romaji over kana in Practice.
+Defaults differ deliberately — Sentences ON (a reading aid for kanji you
+cannot otherwise read), Practice OFF (romaji over kana is the answer key) —
+which is why `initialToplineVisible` is a parameter and `resetEngine` restores
+it rather than forcing false.
+
+When the sentence topline is hidden the per-mora colouring has nowhere to
+live, so the kanji base colours per segment instead. Progress feedback must
+survive the reading being switched off.
 
 ## Shared spine
 

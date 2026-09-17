@@ -108,6 +108,37 @@ describe('SentencePage', () => {
     expect(screen.queryByRole('button', { name: /show filters/i })).not.toBeInTheDocument();
   });
 
+  it('pressing Tab hides the furigana reading, pressing Tab again shows it', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // SECOND has kanji + readings
+    renderPage();
+
+    expect(document.querySelector('rt')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Tab' });
+    expect(document.querySelector('rt')).not.toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Tab' });
+    expect(document.querySelector('rt')).toBeInTheDocument();
+  });
+
+  it('pressing Space restarts the current sentence: progress resets, sentence unchanged', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // SECOND
+    renderPage();
+
+    const tokens = sentenceToEntries(sentenceReading(SECOND.segments));
+    fireEvent.keyDown(window, { key: tokens[0].romaji[0] });
+
+    const inputZone = screen.getByTestId('input-zone');
+    const romajiSpan = () => inputZone.querySelectorAll('p')[0].querySelector('span')!;
+    expect(romajiSpan().textContent).not.toBe('...');
+
+    fireEvent.keyDown(window, { key: ' ', code: 'Space' });
+
+    expect(romajiSpan().textContent).toBe('...');
+    const kanjiSegment = SECOND.segments.find((s) => s.reading);
+    expect(document.querySelector('ruby')).toHaveTextContent(kanjiSegment!.text);
+  });
+
   it('loads a different sentence once the typed sentence is finished, with translation visible again', () => {
     const randomSpy = vi.spyOn(Math, 'random');
     randomSpy.mockReturnValueOnce(0).mockReturnValueOnce(0.5);

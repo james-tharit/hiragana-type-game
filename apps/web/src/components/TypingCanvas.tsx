@@ -1,11 +1,10 @@
 import {
   memo,
   useEffect,
-  useMemo,
 } from 'react';
 import { displayFor } from '@wakana/core';
 import type { Entry, Script } from '@wakana/core';
-import type { RubySegment } from '../data/furigana';
+import type { RubyChar, RubySegment } from '../data/furigana';
 
 type TypingCanvasProps = {
   tokens: Entry[];
@@ -17,8 +16,9 @@ type TypingCanvasProps = {
   currentWrong: boolean;
   isFinished: boolean;
   accuracy: number;
-  targetRevealed: boolean;
-  revealTarget: () => void;
+  toplineVisible: boolean;
+  toggleTopline: () => void;
+  onRestart: () => void;
   inputZoneRef: React.RefObject<HTMLDivElement | null>;
   isFocused: boolean;
   setIsFocused: (v: boolean) => void;
@@ -56,6 +56,18 @@ function statusFor(mora: number | null, index: number, currentWrong: boolean): K
   return 'pending';
 }
 
+// Collapses a segment's per-char moras into one status for its base, used
+// when the topline is hidden and the reading (where per-mora colour usually
+// lives) isn't rendered. A segment made only of null-mora chars (punctuation)
+// never types, so it never leaves 'pending'.
+function segmentStatusFor(chars: RubyChar[], index: number, currentWrong: boolean): KanaTokenProps['status'] {
+  const moras = chars.map((c) => c.mora).filter((m): m is number => m !== null);
+  if (moras.length === 0) return 'pending';
+  if (moras.includes(index)) return currentWrong ? 'error' : 'active';
+  if (moras.every((m) => m < index)) return 'done';
+  return 'pending';
+}
+
 function TypingCanvas({
   tokens,
   segments,
@@ -66,23 +78,14 @@ function TypingCanvas({
   currentWrong,
   isFinished,
   accuracy,
-  targetRevealed,
-  revealTarget,
+  toplineVisible,
+  toggleTopline,
+  onRestart,
   inputZoneRef,
   isFocused,
   setIsFocused,
 }: TypingCanvasProps) {
   const composedDisplay = displayFor(composedKana, script);
-  const activeRomaji = useMemo(() => {
-    if (isFinished || !tokens[index]) {
-      return '';
-    }
-
-    return tokens[index].romaji;
-  }, [tokens, index, isFinished]);
-
-  const typedGhost = activeRomaji.slice(0, Math.min(buffer.length, activeRomaji.length));
-  const pendingGhost = activeRomaji.slice(Math.min(buffer.length, activeRomaji.length));
 
   // Auto-focus the input zone on mount so the window listener immediately
   // registers visible focus state.
@@ -104,6 +107,18 @@ function TypingCanvas({
           <div className="relative flex flex-wrap gap-x-2 gap-y-3 text-4xl leading-tight sm:text-5xl">
             {segments
               ? segments.map((segment, segmentIndex) => {
+                  if (!toplineVisible) {
+                    // Hidden reading: colour the base per segment since
+                    // per-mora colour has nowhere to live without the <rt>.
+                    return (
+                      <KanaToken
+                        key={segmentIndex}
+                        display={segment.text}
+                        status={segmentStatusFor(segment.chars, index, currentWrong)}
+                      />
+                    );
+                  }
+
                   const charTokens = segment.chars.map((c, charIndex) => (
                     <KanaToken
                       key={charIndex}
@@ -117,9 +132,6 @@ function TypingCanvas({
                   }
 
                   return (
-                    // ponytail: base kanji stays text-bark (uncoloured) — the
-                    // reading above it carries progress instead. Upgrade:
-                    // colour the base by its mora range if that's ever needed.
                     <ruby key={segmentIndex} className="text-bark">
                       {segment.text}
                       <rt>{charTokens}</rt>
@@ -137,12 +149,24 @@ function TypingCanvas({
                     status = 'active';
                   }
 
-                  return (
+                  const display = displayFor(token.kana, script);
+                  const kanaToken = (
                     <KanaToken
-                      key={`${token.kana}-${tokenIndex}`}
-                      display={displayFor(token.kana, script)}
+                      key={toplineVisible ? undefined : `${token.kana}-${tokenIndex}`}
+                      display={display}
                       status={status}
                     />
+                  );
+
+                  if (!toplineVisible) {
+                    return kanaToken;
+                  }
+
+                  return (
+                    <ruby key={`${token.kana}-${tokenIndex}`}>
+                      {kanaToken}
+                      <rt>{token.romaji}</rt>
+                    </ruby>
                   );
                 })}
           </div>
@@ -154,24 +178,23 @@ function TypingCanvas({
             <p>
               Kana: <span className={currentWrong ? 'text-red-700' : 'text-bark'}>{composedDisplay || '...'}</span>
             </p>
-            {targetRevealed ? (
-              <p>
-                Target:{' '}
-                <span className="text-bark">{typedGhost}</span>
-                <span className="decoration-sage underline underline-offset-4">{pendingGhost || '...'}</span>
-              </p>
-            ) : (
-              <button
-                type="button"
-                onClick={revealTarget}
-                className="animate-pulse rounded px-2 py-0.5 text-xs font-medium text-moss ring-1 ring-moss/50 transition hover:text-bark hover:ring-moss/70"
-              >
-                Reveal target <span className="opacity-60">[Spacebar]</span>
-              </button>
-            )}
             <p>
               Accuracy: <span className="text-bark">{accuracy.toFixed(1)}%</span>
             </p>
+            <button
+              type="button"
+              onClick={onRestart}
+              className="rounded px-2 py-0.5 text-xs font-medium text-moss ring-1 ring-moss/50 transition hover:text-bark hover:ring-moss/70"
+            >
+              Restart <span className="opacity-60">[Space]</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleTopline}
+              className="rounded px-2 py-0.5 text-xs font-medium text-moss ring-1 ring-moss/50 transition hover:text-bark hover:ring-moss/70"
+            >
+              {toplineVisible ? 'Hide reading' : 'Show reading'} <span className="opacity-60">[Tab]</span>
+            </button>
           </div>
         </div>
       </div>

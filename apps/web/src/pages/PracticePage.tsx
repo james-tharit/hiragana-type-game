@@ -30,8 +30,8 @@ export function PracticePage() {
     isFinished,
     accuracy,
     resetEngine,
-    targetRevealed,
-    revealTarget,
+    toplineVisible,
+    toggleTopline,
   } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
 
   const targetKanaLength = useMemo(
@@ -143,8 +143,9 @@ export function PracticePage() {
               currentWrong={currentWrong}
               isFinished={isFinished}
               accuracy={accuracy}
-              targetRevealed={targetRevealed}
-              revealTarget={revealTarget}
+              toplineVisible={toplineVisible}
+              toggleTopline={toggleTopline}
+              onRestart={resetRound}
               inputZoneRef={inputZoneRef}
               setIsFocused={setIsFocused}
               isFocused={isFocused}
