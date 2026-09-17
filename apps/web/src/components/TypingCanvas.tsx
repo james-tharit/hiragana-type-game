@@ -5,9 +5,11 @@ import {
 } from 'react';
 import { displayFor } from '@wakana/core';
 import type { Entry, Script } from '@wakana/core';
+import type { RubySegment } from '../data/furigana';
 
 type TypingCanvasProps = {
   tokens: Entry[];
+  segments?: RubySegment[];
   script: Script;
   index: number;
   buffer: string;
@@ -47,8 +49,16 @@ const KanaToken = memo(
   (prev, next) => prev.display === next.display && prev.status === next.status,
 );
 
+function statusFor(mora: number | null, index: number, currentWrong: boolean): KanaTokenProps['status'] {
+  if (mora === null) return 'pending';
+  if (mora < index) return 'done';
+  if (mora === index) return currentWrong ? 'error' : 'active';
+  return 'pending';
+}
+
 function TypingCanvas({
   tokens,
+  segments,
   script,
   index,
   buffer,
@@ -92,25 +102,49 @@ function TypingCanvas({
       >
         <div className={`transition duration-150 ${isFocused ? 'opacity-100 blur-0' : 'opacity-70 blur-[1.2px]'}`}>
           <div className="relative flex flex-wrap gap-x-2 gap-y-3 text-4xl leading-tight sm:text-5xl">
-            {tokens.map((token, tokenIndex) => {
-              let status: KanaTokenProps['status'] = 'pending';
+            {segments
+              ? segments.map((segment, segmentIndex) => {
+                  const charTokens = segment.chars.map((c, charIndex) => (
+                    <KanaToken
+                      key={charIndex}
+                      display={c.char}
+                      status={statusFor(c.mora, index, currentWrong)}
+                    />
+                  ));
 
-              if (tokenIndex < index) {
-                status = 'done';
-              } else if (tokenIndex === index && currentWrong) {
-                status = 'error';
-              } else if (tokenIndex === index) {
-                status = 'active';
-              }
+                  if (!segment.reading) {
+                    return <span key={segmentIndex}>{charTokens}</span>;
+                  }
 
-              return (
-                <KanaToken
-                  key={`${token.kana}-${tokenIndex}`}
-                  display={displayFor(token.kana, script)}
-                  status={status}
-                />
-              );
-            })}
+                  return (
+                    // ponytail: base kanji stays text-bark (uncoloured) — the
+                    // reading above it carries progress instead. Upgrade:
+                    // colour the base by its mora range if that's ever needed.
+                    <ruby key={segmentIndex} className="text-bark">
+                      {segment.text}
+                      <rt>{charTokens}</rt>
+                    </ruby>
+                  );
+                })
+              : tokens.map((token, tokenIndex) => {
+                  let status: KanaTokenProps['status'] = 'pending';
+
+                  if (tokenIndex < index) {
+                    status = 'done';
+                  } else if (tokenIndex === index && currentWrong) {
+                    status = 'error';
+                  } else if (tokenIndex === index) {
+                    status = 'active';
+                  }
+
+                  return (
+                    <KanaToken
+                      key={`${token.kana}-${tokenIndex}`}
+                      display={displayFor(token.kana, script)}
+                      status={status}
+                    />
+                  );
+                })}
           </div>
 
           <div className="mt-7 flex flex-wrap items-center gap-4 text-base text-sage">

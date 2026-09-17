@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import StatsDisplay from '../components/StatsDisplay';
 import TypingCanvas from '../components/TypingCanvas';
 import { sentenceToEntries } from '../data/sentences';
+import { sentenceReading, sentenceText, toRubySegments, type Segment } from '../data/furigana';
 import sentencesData from '../data/sentences.json';
 import { useTypingEngine } from '../hooks/useTypingEngine';
 import { canSpeakJapanese, speak } from '../lib/speech';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
-type Sentence = { id: number; text: string; translation: string };
+type Sentence = { id: number; segments: Segment[]; translation: string };
 
 const sentences = sentencesData as Sentence[];
 
@@ -25,14 +26,15 @@ export function SentencePage() {
   const inputZoneRef = useRef<HTMLDivElement | null>(null);
   const [isFocused, setIsFocused] = useState(true);
   const [sentence, setSentence] = useState(() => pickSentence());
-  const [tokens, setTokens] = useState(() => sentenceToEntries(sentence.text));
-  const [translationRevealed, setTranslationRevealed] = useState(false);
+  const [tokens, setTokens] = useState(() => sentenceToEntries(sentenceReading(sentence.segments)));
+  const [translationRevealed, setTranslationRevealed] = useState(true);
   const canSpeak = canSpeakJapanese();
+  const rubySegments = useMemo(() => toRubySegments(sentence.segments), [sentence.segments]);
 
   const loadSentence = (next: Sentence) => {
     setSentence(next);
-    setTokens(sentenceToEntries(next.text));
-    setTranslationRevealed(false);
+    setTokens(sentenceToEntries(sentenceReading(next.segments)));
+    setTranslationRevealed(true);
   };
 
   const {
@@ -98,27 +100,12 @@ export function SentencePage() {
       <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-bark sm:px-8">
         <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
           <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sentence Practice</h1>
-              {translationRevealed ? (
-                <p className="mt-1 text-sm text-sage" data-testid="sentence-translation">
-                  {sentence.translation}
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setTranslationRevealed(true)}
-                  className="mt-1 rounded-lg border border-moss/30 bg-sand px-2 py-1 text-xs font-medium text-bark transition hover:bg-leaf/40"
-                >
-                  Show translation
-                </button>
-              )}
-            </div>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sentence Practice</h1>
             <div className="flex gap-2">
               {canSpeak && (
                 <button
                   type="button"
-                  onClick={() => speak(sentence.text)}
+                  onClick={() => speak(sentenceText(sentence.segments))}
                   className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40"
                 >
                   Listen
@@ -137,6 +124,7 @@ export function SentencePage() {
           <div className="relative">
             <TypingCanvas
               tokens={tokens}
+              segments={rubySegments}
               // ponytail: sentences already mix hiragana/katakana as written;
               // running them through the katakana transform would mangle
               // real words, so "hiragana" (the identity case) is intentional
@@ -169,6 +157,21 @@ export function SentencePage() {
                 isFinished={isFinished}
               />
             </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            {translationRevealed && (
+              <p className="text-sm text-sage" data-testid="sentence-translation">
+                {sentence.translation}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setTranslationRevealed((revealed) => !revealed)}
+              className="rounded-lg border border-moss/30 bg-sand px-2 py-1 text-xs font-medium text-bark transition hover:bg-leaf/40"
+            >
+              {translationRevealed ? 'Hide translation' : 'Show translation'}
+            </button>
           </div>
         </section>
       </main>

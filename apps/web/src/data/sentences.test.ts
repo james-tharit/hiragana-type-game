@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { isKanaOnly, isSuitable, sentenceToEntries } from './sentences';
+import { sentenceReading, sentenceText } from './furigana';
 import sentences from './sentences.json';
+
+const HAN_RE = /\p{Script=Han}/u;
+const KATAKANA_RE = /\p{Script=Katakana}/u;
 
 describe('isKanaOnly', () => {
   it('accepts a hiragana-only sentence with punctuation', () => {
@@ -101,9 +105,26 @@ describe('committed sentence pool', () => {
     expect(sentences.length).toBeGreaterThan(0);
   });
 
-  it('contains only kana-only text', () => {
+  it('has a kana-only reading for every entry', () => {
     for (const s of sentences) {
-      expect(isKanaOnly(s.text)).toBe(true);
+      expect(isKanaOnly(sentenceReading(s.segments))).toBe(true);
+    }
+  });
+
+  it('has a non-empty, kana-only reading and non-empty text on every segment that has a reading', () => {
+    for (const s of sentences) {
+      for (const seg of s.segments) {
+        expect(seg.text.length).toBeGreaterThan(0);
+        if (seg.reading !== undefined) {
+          expect(isKanaOnly(seg.reading)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('produces non-empty display text for every entry', () => {
+    for (const s of sentences) {
+      expect(sentenceText(s.segments).length).toBeGreaterThan(0);
     }
   });
 
@@ -115,7 +136,7 @@ describe('committed sentence pool', () => {
 
   it('produces only typeable romaji for every entry', () => {
     for (const s of sentences) {
-      const entries = sentenceToEntries(s.text);
+      const entries = sentenceToEntries(sentenceReading(s.segments));
       expect(entries.length).toBeGreaterThan(0);
       for (const e of entries) {
         expect(e.romaji).toBeTruthy();
@@ -137,5 +158,15 @@ describe('committed sentence pool', () => {
 
   it('has exactly 300 entries', () => {
     expect(sentences.length).toBe(300);
+  });
+
+  it('renders kanji in at least 200 of the 300 entries', () => {
+    const withKanji = sentences.filter((s) => HAN_RE.test(sentenceText(s.segments)));
+    expect(withKanji.length).toBeGreaterThanOrEqual(200);
+  });
+
+  it('renders katakana in at least 15 of the 300 entries', () => {
+    const withKatakana = sentences.filter((s) => KATAKANA_RE.test(sentenceText(s.segments)));
+    expect(withKatakana.length).toBeGreaterThanOrEqual(15);
   });
 });

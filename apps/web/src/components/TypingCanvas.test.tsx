@@ -1,7 +1,8 @@
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import TypingCanvas from './TypingCanvas';
 import type { Entry } from '@wakana/core';
+import { toRubySegments } from '../data/furigana';
 import React from 'react';
 import { vi, describe, it, expect } from 'vitest';
 
@@ -86,6 +87,54 @@ describe('TypingCanvas', () => {
         it('reveals the current mora when the reveal button is clicked', () => {
             render(<TypingCanvas {...baseProps} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} targetRevealed />);
             expect(screen.getByText('a')).toBeInTheDocument();
+        });
+    });
+
+    describe('ruby segments', () => {
+        const segments = toRubySegments([
+            { text: '猫', reading: 'ねこ' },
+            { text: 'が' },
+            { text: '。' },
+        ]);
+
+        it('renders the kanji as ruby base with its reading in rt, and non-kanji plain', () => {
+            const { container } = render(
+                <TypingCanvas {...baseProps} segments={segments} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+
+            const ruby = container.querySelector('ruby');
+            expect(ruby).not.toBeNull();
+            expect(ruby!.childNodes[0].textContent).toBe('猫');
+
+            const rt = ruby!.querySelector('rt');
+            expect(rt!.textContent).toBe('ねこ');
+
+            const ga = screen.getByText('が');
+            expect(ga.closest('ruby')).toBeNull();
+        });
+
+        it('colors reading chars by mora relative to index', () => {
+            const { container } = render(
+                <TypingCanvas {...baseProps} segments={segments} index={1} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            const rt = container.querySelector('rt')!;
+            expect(within(rt).getByText('ね').className).toContain('text-bark');
+            expect(within(rt).getByText('こ').className).toContain('text-moss');
+        });
+
+        it('marks the active mora as error when currentWrong', () => {
+            const { container } = render(
+                <TypingCanvas {...baseProps} segments={segments} index={1} currentWrong inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            const rt = container.querySelector('rt')!;
+            expect(within(rt).getByText('こ').className).toContain('text-red-700');
+        });
+
+        it('never marks a null-mora char active', () => {
+            render(
+                <TypingCanvas {...baseProps} segments={segments} index={5} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(screen.getByText('。').className).not.toContain('text-moss');
         });
     });
 });
