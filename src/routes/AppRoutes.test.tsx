@@ -62,6 +62,22 @@ describe('AppRoutes', () => {
       renderAt('/about');
       expect(screen.getByRole('link', { name: /back to practice/i })).toBeInTheDocument();
     });
+
+    it('attributes sentence data to Tatoeba with a link to tatoeba.org', () => {
+      renderAt('/about');
+      expect(screen.getByText(/tatoeba/i)).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /tatoeba/i })).toHaveAttribute(
+        'href',
+        'https://tatoeba.org',
+      );
+    });
+  });
+
+  describe('route "/sentences"', () => {
+    it('renders the Sentence Practice page', () => {
+      renderAt('/sentences');
+      expect(screen.getByRole('heading', { name: /sentence practice/i })).toBeInTheDocument();
+    });
   });
 
   describe('route "/group/:id"', () => {

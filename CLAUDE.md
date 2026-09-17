@@ -19,8 +19,16 @@ branches/statements and gate the Vercel deploy.
    option was built and then removed as unnecessary; `Entry.romaji` is the typed
    target and is unrelated to it.
 2. **Sentences** — `/sentences`. Whole kana-only sentences sourced from
-   Tatoeba, typed end to end. Sentences ship as a checked-in JSON file
-   regenerated on demand before a deploy, never fetched at runtime.
+   Tatoeba, typed end to end with the English translation shown. Sentences ship
+   as a checked-in JSON file (`src/data/sentences.json`, 300 entries) never
+   fetched at runtime; `npm run sentences:refresh` regenerates it, downloading
+   ~30MB to a temp dir. The script filters for kana-only text, a usable length,
+   and suitability — Tatoeba is unfiltered, so that last filter is not optional.
+   The script is the only way to change that file; hand-editing it makes the
+   filters a lie.
+
+   The script selector does not apply here: sentences already mix hiragana and
+   katakana, so `SentencePage` passes the identity case.
 
 `/arcade` (T-Rex runner driven by typed kana) and `/kana` (reference chart) are
 additional surfaces built on the same kana pool, not game modes in their own
