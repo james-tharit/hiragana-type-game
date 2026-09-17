@@ -18,8 +18,9 @@ describe('TypingCanvas', () => {
         currentWrong: false,
         isFinished: false,
         accuracy: 100,
-        targetRevealed: false,
-        revealTarget: vi.fn(),
+        toplineVisible: false,
+        toggleTopline: vi.fn(),
+        onRestart: vi.fn(),
         script: 'hiragana' as const,
     };
 
@@ -78,19 +79,62 @@ describe('TypingCanvas', () => {
         });
     });
 
-    describe('reveal hint', () => {
-        it('shows the reveal button before any mistake has been made', () => {
-            render(<TypingCanvas {...baseProps} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
-            expect(screen.getByRole('button', { name: /Reveal target/i })).toBeInTheDocument();
+    describe('practice topline', () => {
+        it('renders a ruby per token with romaji as rt when topline is visible', () => {
+            const { container } = render(
+                <TypingCanvas {...baseProps} toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            const rubies = container.querySelectorAll('ruby');
+            expect(rubies.length).toBe(2);
+            expect(rubies[0].querySelector('rt')!.textContent).toBe('a');
+            expect(rubies[1].querySelector('rt')!.textContent).toBe('i');
         });
 
-        it('reveals the current mora when the reveal button is clicked', () => {
-            render(<TypingCanvas {...baseProps} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} targetRevealed />);
-            expect(screen.getByText('a')).toBeInTheDocument();
+        it('renders no ruby at all when topline is hidden', () => {
+            const { container } = render(
+                <TypingCanvas {...baseProps} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(container.querySelector('ruby')).toBeNull();
         });
     });
 
-    describe('ruby segments', () => {
+    describe('action row', () => {
+        it('calls onRestart when Restart is clicked', () => {
+            const onRestart = vi.fn();
+            render(<TypingCanvas {...baseProps} onRestart={onRestart} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            fireEvent.click(screen.getByRole('button', { name: /Restart/i }));
+            expect(onRestart).toHaveBeenCalled();
+        });
+
+        it('calls toggleTopline when the reading button is clicked', () => {
+            const toggleTopline = vi.fn();
+            render(<TypingCanvas {...baseProps} toggleTopline={toggleTopline} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            fireEvent.click(screen.getByRole('button', { name: /Show reading/i }));
+            expect(toggleTopline).toHaveBeenCalled();
+        });
+
+        it('labels the button Show reading when topline is hidden', () => {
+            render(<TypingCanvas {...baseProps} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.getByRole('button', { name: /Show reading/i })).toBeInTheDocument();
+        });
+
+        it('labels the button Hide reading when topline is visible', () => {
+            render(<TypingCanvas {...baseProps} toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.getByRole('button', { name: /Hide reading/i })).toBeInTheDocument();
+        });
+
+        it('never renders a Reveal target button or a Target readout', () => {
+            const { rerender } = render(<TypingCanvas {...baseProps} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.queryByRole('button', { name: /Reveal target/i })).not.toBeInTheDocument();
+            expect(screen.queryByText(/Target:/i)).not.toBeInTheDocument();
+
+            rerender(<TypingCanvas {...baseProps} toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />);
+            expect(screen.queryByRole('button', { name: /Reveal target/i })).not.toBeInTheDocument();
+            expect(screen.queryByText(/Target:/i)).not.toBeInTheDocument();
+        });
+    });
+
+    describe('ruby segments (topline visible)', () => {
         const segments = toRubySegments([
             { text: '猫', reading: 'ねこ' },
             { text: 'が' },
@@ -99,7 +143,7 @@ describe('TypingCanvas', () => {
 
         it('renders the kanji as ruby base with its reading in rt, and non-kanji plain', () => {
             const { container } = render(
-                <TypingCanvas {...baseProps} segments={segments} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+                <TypingCanvas {...baseProps} segments={segments} toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
             );
 
             const ruby = container.querySelector('ruby');
@@ -115,7 +159,7 @@ describe('TypingCanvas', () => {
 
         it('colors reading chars by mora relative to index', () => {
             const { container } = render(
-                <TypingCanvas {...baseProps} segments={segments} index={1} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+                <TypingCanvas {...baseProps} segments={segments} index={1} toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
             );
             const rt = container.querySelector('rt')!;
             expect(within(rt).getByText('ね').className).toContain('text-bark');
@@ -124,7 +168,7 @@ describe('TypingCanvas', () => {
 
         it('marks the active mora as error when currentWrong', () => {
             const { container } = render(
-                <TypingCanvas {...baseProps} segments={segments} index={1} currentWrong inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+                <TypingCanvas {...baseProps} segments={segments} index={1} currentWrong toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
             );
             const rt = container.querySelector('rt')!;
             expect(within(rt).getByText('こ').className).toContain('text-red-700');
@@ -132,9 +176,53 @@ describe('TypingCanvas', () => {
 
         it('never marks a null-mora char active', () => {
             render(
-                <TypingCanvas {...baseProps} segments={segments} index={5} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+                <TypingCanvas {...baseProps} segments={segments} index={5} toplineVisible inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
             );
             expect(screen.getByText('。').className).not.toContain('text-moss');
+        });
+    });
+
+    describe('ruby segments (topline hidden)', () => {
+        const segments = toRubySegments([
+            { text: '猫', reading: 'ねこ' },
+            { text: 'が' },
+            { text: '。' },
+        ]);
+
+        it('renders no rt anywhere', () => {
+            const { container } = render(
+                <TypingCanvas {...baseProps} segments={segments} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(container.querySelector('rt')).toBeNull();
+        });
+
+        it('colours a fully-typed segment base as done', () => {
+            // ね=mora0, こ=mora1, が=mora2 — index 2 means 猫(ねこ) is fully typed.
+            render(
+                <TypingCanvas {...baseProps} segments={segments} index={2} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(screen.getByText('猫').className).toContain('text-bark');
+        });
+
+        it('colours the segment holding the current mora as active', () => {
+            render(
+                <TypingCanvas {...baseProps} segments={segments} index={2} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(screen.getByText('が').className).toContain('text-moss');
+        });
+
+        it('colours the active segment as error when currentWrong', () => {
+            render(
+                <TypingCanvas {...baseProps} segments={segments} index={2} currentWrong toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(screen.getByText('が').className).toContain('text-red-700');
+        });
+
+        it('keeps a punctuation-only segment pending regardless of index', () => {
+            render(
+                <TypingCanvas {...baseProps} segments={segments} index={5} toplineVisible={false} inputZoneRef={{ current: null }} isFocused setIsFocused={vi.fn()} />,
+            );
+            expect(screen.getByText('。').className).toContain('text-sage');
         });
     });
 });

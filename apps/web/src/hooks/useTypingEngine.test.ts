@@ -42,9 +42,11 @@ describe('useTypingEngine', () => {
   });
 
   describe('handleKeyDown – special keys', () => {
-    it('Tab: calls preventDefault and returns "none"', () => {
+    it('Tab: flips toplineVisible false to true', () => {
       const { result } = renderHook(() => useTypingEngine(TOKENS));
       const preventDefault = vi.fn();
+
+      expect(result.current.toplineVisible).toBe(false);
 
       let returnVal: string | undefined;
       act(() => {
@@ -53,6 +55,79 @@ describe('useTypingEngine', () => {
 
       expect(preventDefault).toHaveBeenCalled();
       expect(returnVal).toBe('none');
+      expect(result.current.toplineVisible).toBe(true);
+    });
+
+    it('Tab: flips toplineVisible true back to false', () => {
+      const { result } = renderHook(() => useTypingEngine(TOKENS));
+
+      act(() => {
+        result.current.handleKeyDown(makeKeyEvent('Tab'));
+      });
+      expect(result.current.toplineVisible).toBe(true);
+
+      act(() => {
+        result.current.handleKeyDown(makeKeyEvent('Tab'));
+      });
+      expect(result.current.toplineVisible).toBe(false);
+    });
+
+    it('toplineVisible starts true when initialToplineVisible is true', () => {
+      const { result } = renderHook(() => useTypingEngine(TOKENS, undefined, true));
+      expect(result.current.toplineVisible).toBe(true);
+    });
+
+    it('Space: calls onResetRound and zeroes the engine with no prior mistake', () => {
+      const onResetRound = vi.fn();
+      const { result } = renderHook(() => useTypingEngine(TOKENS, onResetRound));
+      const preventDefault = vi.fn();
+
+      act(() => {
+        result.current.handleKeyDown(makeKeyEvent('a'));
+      });
+      expect(result.current.index).toBe(1);
+
+      let returnVal: string | undefined;
+      act(() => {
+        returnVal = result.current.handleKeyDown({
+          key: ' ',
+          code: 'Space',
+          preventDefault,
+        } as unknown as React.KeyboardEvent<HTMLDivElement>);
+      });
+
+      expect(preventDefault).toHaveBeenCalled();
+      expect(returnVal).toBe('reset-round');
+    });
+
+    it('Space does not type a character or count a keystroke', () => {
+      const { result } = renderHook(() => useTypingEngine(TOKENS));
+
+      act(() => {
+        result.current.handleKeyDown({
+          key: ' ',
+          code: 'Space',
+          preventDefault: vi.fn(),
+        } as unknown as React.KeyboardEvent<HTMLDivElement>);
+      });
+
+      expect(result.current.totalKeystrokes).toBe(0);
+      expect(result.current.buffer).toBe('');
+    });
+
+    it('after initialToplineVisible true, toggling off then restarting brings it back on', () => {
+      const { result } = renderHook(() => useTypingEngine(TOKENS, undefined, true));
+      expect(result.current.toplineVisible).toBe(true);
+
+      act(() => {
+        result.current.handleKeyDown(makeKeyEvent('Tab'));
+      });
+      expect(result.current.toplineVisible).toBe(false);
+
+      act(() => {
+        result.current.resetEngine();
+      });
+      expect(result.current.toplineVisible).toBe(true);
     });
 
     it('Escape: calls preventDefault and returns "reset-round"', () => {

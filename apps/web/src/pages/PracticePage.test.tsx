@@ -32,7 +32,7 @@ describe('PracticePage', () => {
 
     it('renders the Restart button', () => {
       renderPage();
-      expect(screen.getByRole('button', { name: /restart/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Restart' })).toBeInTheDocument();
     });
   });
 
@@ -61,7 +61,7 @@ describe('PracticePage', () => {
   describe('new round', () => {
     it('clicking Restart keeps the input zone mounted', () => {
       renderPage();
-      fireEvent.click(screen.getByRole('button', { name: /restart/i }));
+      fireEvent.click(screen.getByRole('button', { name: 'Restart' }));
       expect(screen.getByTestId('input-zone')).toBeInTheDocument();
     });
 
@@ -69,6 +69,28 @@ describe('PracticePage', () => {
       renderPage();
       fireEvent.keyDown(window, { key: 'Escape' });
       expect(screen.getByTestId('input-zone')).toBeInTheDocument();
+    });
+
+    it('pressing Space also starts a fresh round', () => {
+      renderPage();
+      fireEvent.keyDown(window, { key: ' ', code: 'Space' });
+      expect(screen.getByTestId('input-zone')).toBeInTheDocument();
+    });
+  });
+
+  describe('topline reveal', () => {
+    it('renders with no topline visible initially', () => {
+      renderPage();
+      expect(document.querySelector('rt')).not.toBeInTheDocument();
+    });
+
+    it('pressing Tab shows the romaji topline, pressing Tab again hides it', () => {
+      renderPage();
+      fireEvent.keyDown(window, { key: 'Tab' });
+      expect(document.querySelector('rt')).toBeInTheDocument();
+
+      fireEvent.keyDown(window, { key: 'Tab' });
+      expect(document.querySelector('rt')).not.toBeInTheDocument();
     });
   });
 

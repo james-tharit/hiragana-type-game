@@ -18,9 +18,8 @@ type UseTypingEngineResult = {
   completedKanaLength: number;
   wpm: number;
   accuracy: number;
-  hasFailedOnce: boolean;
-  targetRevealed: boolean;
-  revealTarget: () => void;
+  toplineVisible: boolean;
+  toggleTopline: () => void;
   resetEngine: () => void;
   /** Exposed for unit-test instrumentation. The window listener drives production input. */
   handleKeyDown: (event: KeyboardEvent<HTMLDivElement>) => KeyResult;
@@ -62,11 +61,18 @@ function checkInput(buffer: string, targetRomaji: string, targetKana: string): I
 /**
  * @param tokens - The sequence of kana/romaji entries for the current round.
  * @param onResetRound - Called by the internal window listener when the user
- *   presses Escape or Enter-on-finish. The callback should create new tokens
- *   (e.g. `setTokens(createRound(groupIds))`). The engine resets its own state
- *   before invoking this callback, so callers do NOT need to call `resetEngine`.
+ *   presses Escape, Space, or Enter-on-finish. The callback should create new
+ *   tokens (e.g. `setTokens(createRound(groupIds))`). The engine resets its own
+ *   state before invoking this callback, so callers do NOT need to call
+ *   `resetEngine`.
+ * @param initialToplineVisible - Starting value of `toplineVisible`, and what
+ *   `resetEngine` restores it to (not always `false`).
  */
-export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): UseTypingEngineResult {
+export function useTypingEngine(
+  tokens: Entry[],
+  onResetRound?: () => void,
+  initialToplineVisible = false,
+): UseTypingEngineResult {
   const [index, setIndex] = useState(0);
   const [buffer, setBuffer] = useState('');
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -75,8 +81,7 @@ export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): Use
   const [mistakeKeystrokes, setMistakeKeystrokes] = useState(0);
   const [currentWrong, setCurrentWrong] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const [hasFailedOnce, setHasFailedOnce] = useState(false);
-  const [targetRevealed, setTargetRevealed] = useState(false);
+  const [toplineVisible, setToplineVisible] = useState(initialToplineVisible);
 
   const isFinished = index >= tokens.length;
 
@@ -137,15 +142,20 @@ export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): Use
     setMistakeKeystrokes(0);
     setCurrentWrong(false);
     setNow(Date.now());
-    setHasFailedOnce(false);
-    setTargetRevealed(false);
+    setToplineVisible(initialToplineVisible);
   };
 
-  const revealTarget = () => setTargetRevealed(true);
+  const toggleTopline = () => setToplineVisible((prev) => !prev);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): KeyResult => {
+    if (event.code === 'Space') {
+      event.preventDefault();
+      return 'reset-round';
+    }
+
     if (event.key === 'Tab') {
       event.preventDefault();
+      toggleTopline();
       return 'none';
     }
 
@@ -212,27 +222,11 @@ export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): Use
     return 'none';
   };
 
-  // ── UI reveal state ──────────────────────────────────────────────────────
-  // Reset per-token reveal flags whenever the active token advances.
-  useEffect(() => {
-    setHasFailedOnce(false);
-    setTargetRevealed(false);
-  }, [index]);
-
-  // Latch hasFailedOnce the first time the current token is answered wrong.
-  useEffect(() => {
-    if (currentWrong) {
-      setHasFailedOnce(true);
-    }
-  }, [currentWrong]);
-
   // ── Window keyboard listener ─────────────────────────────────────────────
   // A single stable listener is registered once. A ref keeps it current with
   // the latest closure values so it never needs to be re-registered.
   type ListenerSnapshot = {
     handleKeyDown: typeof handleKeyDown;
-    hasFailedOnce: boolean;
-    targetRevealed: boolean;
     resetEngine: () => void;
     onResetRound: () => void;
   };
@@ -243,8 +237,6 @@ export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): Use
   useEffect(() => {
     listenerRef.current = {
       handleKeyDown,
-      hasFailedOnce,
-      targetRevealed,
       resetEngine,
       onResetRound: onResetRound ?? (() => {}),
     };
@@ -255,13 +247,6 @@ export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): Use
     const handler = (event: globalThis.KeyboardEvent) => {
       const snap = listenerRef.current;
       if (!snap) return;
-
-      // Space reveals the target romaji when the user has already failed.
-      if (event.code === 'Space' && snap.hasFailedOnce && !snap.targetRevealed) {
-        event.preventDefault();
-        setTargetRevealed(true);
-        return;
-      }
 
       // Adapt the native event to the shape handleKeyDown expects.
       const synthetic = {
@@ -296,9 +281,8 @@ export function useTypingEngine(tokens: Entry[], onResetRound?: () => void): Use
     completedKanaLength,
     wpm,
     accuracy,
-    hasFailedOnce,
-    targetRevealed,
-    revealTarget,
+    toplineVisible,
+    toggleTopline,
     resetEngine,
     handleKeyDown,
   };

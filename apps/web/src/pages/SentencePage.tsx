@@ -47,9 +47,9 @@ export function SentencePage() {
     isFinished,
     accuracy,
     resetEngine,
-    targetRevealed,
-    revealTarget,
-  } = useTypingEngine(tokens, () => loadSentence(pickSentence(sentence.id)));
+    toplineVisible,
+    toggleTopline,
+  } = useTypingEngine(tokens, undefined, true);
 
   const nextSentence = () => {
     loadSentence(pickSentence(sentence.id));
@@ -136,8 +136,9 @@ export function SentencePage() {
               currentWrong={currentWrong}
               isFinished={isFinished}
               accuracy={accuracy}
-              targetRevealed={targetRevealed}
-              revealTarget={revealTarget}
+              toplineVisible={toplineVisible}
+              toggleTopline={toggleTopline}
+              onRestart={resetEngine}
               inputZoneRef={inputZoneRef}
               setIsFocused={setIsFocused}
               isFocused={isFocused}
