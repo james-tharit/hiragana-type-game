@@ -96,19 +96,19 @@ describe('StatsDisplay', () => {
         <StatsDisplay {...defaults} accuracy={10} isFinished={false} />,
       );
       const accuracyValue = screen.getByText('10.0%');
-      expect(accuracyValue.className).toContain('text-ink-100');
+      expect(accuracyValue.className).toContain('text-bark');
     });
 
     it('uses red color for accuracy < 15 when finished', () => {
       render(<StatsDisplay {...defaults} accuracy={10} isFinished />);
       const accuracyValue = screen.getByText('10.0%');
-      expect(accuracyValue.className).toContain('text-red-400');
+      expect(accuracyValue.className).toContain('text-red-700');
     });
 
     it('uses orange color for accuracy between 15 and 30 when finished', () => {
       render(<StatsDisplay {...defaults} accuracy={20} isFinished />);
       const accuracyValue = screen.getByText('20.0%');
-      expect(accuracyValue.className).toContain('text-orange-400');
+      expect(accuracyValue.className).toContain('text-moss');
     });
 
     it('uses green color for accuracy > 80 when finished', () => {
@@ -120,7 +120,7 @@ describe('StatsDisplay', () => {
     it('uses default ink color for accuracy between 30 and 80 when finished', () => {
       render(<StatsDisplay {...defaults} accuracy={50} isFinished />);
       const accuracyValue = screen.getByText('50.0%');
-      expect(accuracyValue.className).toContain('text-ink-100');
+      expect(accuracyValue.className).toContain('text-bark');
     });
   });
 });

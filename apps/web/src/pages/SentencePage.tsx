@@ -95,20 +95,20 @@ export function SentencePage() {
         <meta name="twitter:image" content={`${SITE_URL}/og-sentences.png`} />
       </Helmet>
 
-      <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+      <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl flex-col px-4 pb-10 pt-8 text-bark sm:px-8">
+        <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
           <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sentence Practice</h1>
               {translationRevealed ? (
-                <p className="mt-1 text-sm text-ink-500" data-testid="sentence-translation">
+                <p className="mt-1 text-sm text-sage" data-testid="sentence-translation">
                   {sentence.translation}
                 </p>
               ) : (
                 <button
                   type="button"
                   onClick={() => setTranslationRevealed(true)}
-                  className="mt-1 rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-xs font-medium text-white transition hover:bg-white/20"
+                  className="mt-1 rounded-lg border border-moss/30 bg-sand px-2 py-1 text-xs font-medium text-bark transition hover:bg-leaf/40"
                 >
                   Show translation
                 </button>
@@ -119,7 +119,7 @@ export function SentencePage() {
                 <button
                   type="button"
                   onClick={() => speak(sentence.text)}
-                  className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+                  className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40"
                 >
                   Listen
                 </button>
@@ -127,7 +127,7 @@ export function SentencePage() {
               <button
                 type="button"
                 onClick={nextSentence}
-                className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+                className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40"
               >
                 Skip
               </button>
@@ -155,7 +155,7 @@ export function SentencePage() {
               isFocused={isFocused}
             />
             <div
-              className={`absolute inset-0 z-30 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/80 p-8 backdrop-blur-sm transition-opacity duration-500 sm:p-10 ${
+              className={`absolute inset-0 z-30 flex flex-col items-center justify-center rounded-2xl border border-moss/20 bg-cream/95 p-8 backdrop-blur-sm transition-opacity duration-500 sm:p-10 ${
                 isFinished ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
               }`}
             >

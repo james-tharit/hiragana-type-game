@@ -25,13 +25,13 @@ describe('Character filter selection logic', () => {
 
     const kaButton = screen.getByRole('button', { name: 'ka-ko' });
 
-    expect(kaButton.className).toContain('bg-ink-100');
+    expect(kaButton.className).toContain('bg-moss');
 
     fireEvent.click(kaButton);
-    expect(kaButton.className).toContain('bg-white/5');
+    expect(kaButton.className).toContain('bg-sand/60');
 
     fireEvent.click(kaButton);
-    expect(kaButton.className).toContain('bg-ink-100');
+    expect(kaButton.className).toContain('bg-moss');
   });
 
   it('selects and de-selects an entire group family', () => {

@@ -38,26 +38,26 @@ describe('CommonNav', () => {
   it('highlights the Practice link when on /practice', () => {
     renderNav('/practice');
     const link = screen.getByRole('link', { name: 'Practice' });
-    expect(link.className).toContain('bg-white/10');
-    expect(link.className).toContain('text-white');
+    expect(link.className).toContain('bg-moss');
+    expect(link.className).toContain('text-cream');
   });
 
   it('highlights the Arcade link when on /arcade', () => {
     renderNav('/arcade');
     const link = screen.getByRole('link', { name: 'Arcade' });
-    expect(link.className).toContain('bg-white/10');
-    expect(link.className).toContain('text-white');
+    expect(link.className).toContain('bg-moss');
+    expect(link.className).toContain('text-cream');
   });
 
   it('does not highlight Practice when on /arcade', () => {
     renderNav('/arcade');
     const link = screen.getByRole('link', { name: 'Practice' });
-    expect(link.className).not.toContain('bg-white/10');
+    expect(link.className).not.toContain('bg-moss');
   });
 
   it('does not highlight either mode tab when on /about', () => {
     renderNav('/about');
-    expect(screen.getByRole('link', { name: 'Practice' }).className).not.toContain('bg-white/10');
-    expect(screen.getByRole('link', { name: 'Arcade' }).className).not.toContain('bg-white/10');
+    expect(screen.getByRole('link', { name: 'Practice' }).className).not.toContain('bg-moss');
+    expect(screen.getByRole('link', { name: 'Arcade' }).className).not.toContain('bg-moss');
   });
 });

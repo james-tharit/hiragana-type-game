@@ -31,12 +31,12 @@ const KanaToken = memo(
   ({ display, status }: KanaTokenProps) => {
     const colorClass =
       status === 'done'
-        ? 'text-ink-100'
+        ? 'text-bark'
         : status === 'error'
-          ? 'text-red-500'
+          ? 'text-red-700'
           : status === 'active'
-            ? 'text-orange-400'
-            : 'text-ink-500';
+            ? 'text-moss'
+            : 'text-sage';
 
     return (
       <span className={`${colorClass} transition-colors duration-150`}>
@@ -88,7 +88,7 @@ function TypingCanvas({
         data-testid="input-zone"
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className="relative mb-6 min-h-[17rem] rounded-2xl border border-white/10 bg-black/30 p-8 outline-none transition focus:border-white/30 sm:p-10"
+        className="relative mb-6 min-h-[17rem] rounded-2xl border border-moss/20 bg-cream p-8 outline-none transition focus:border-moss/50 sm:p-10"
       >
         <div className={`transition duration-150 ${isFocused ? 'opacity-100 blur-0' : 'opacity-70 blur-[1.2px]'}`}>
           <div className="relative flex flex-wrap gap-x-2 gap-y-3 text-4xl leading-tight sm:text-5xl">
@@ -113,30 +113,30 @@ function TypingCanvas({
             })}
           </div>
 
-          <div className="mt-7 flex flex-wrap items-center gap-4 text-base text-ink-500">
+          <div className="mt-7 flex flex-wrap items-center gap-4 text-base text-sage">
             <p>
-              Romaji: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{buffer || '...'}</span>
+              Romaji: <span className={currentWrong ? 'text-red-700' : 'text-bark'}>{buffer || '...'}</span>
             </p>
             <p>
-              Kana: <span className={currentWrong ? 'text-red-400' : 'text-ink-100'}>{composedDisplay || '...'}</span>
+              Kana: <span className={currentWrong ? 'text-red-700' : 'text-bark'}>{composedDisplay || '...'}</span>
             </p>
             {targetRevealed ? (
               <p>
                 Target:{' '}
-                <span className="text-ink-100">{typedGhost}</span>
-                <span className="decoration-ink-700 underline underline-offset-4">{pendingGhost || '...'}</span>
+                <span className="text-bark">{typedGhost}</span>
+                <span className="decoration-sage underline underline-offset-4">{pendingGhost || '...'}</span>
               </p>
             ) : (
               <button
                 type="button"
                 onClick={revealTarget}
-                className="animate-pulse rounded px-2 py-0.5 text-xs font-medium text-orange-400 ring-1 ring-orange-400/50 transition hover:text-orange-300 hover:ring-orange-300/70"
+                className="animate-pulse rounded px-2 py-0.5 text-xs font-medium text-moss ring-1 ring-moss/50 transition hover:text-bark hover:ring-moss/70"
               >
                 Reveal target <span className="opacity-60">[Spacebar]</span>
               </button>
             )}
             <p>
-              Accuracy: <span className="text-ink-100">{accuracy.toFixed(1)}%</span>
+              Accuracy: <span className="text-bark">{accuracy.toFixed(1)}%</span>
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ function TypingCanvas({
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => inputZoneRef?.current?.focus()}
           tabIndex={0}
-          className="absolute inset-0 z-20 rounded-2xl bg-black/50 text-sm font-semibold uppercase tracking-[0.14em] text-ink-100"
+          className="absolute inset-0 z-20 rounded-2xl bg-sand/80 text-sm font-semibold uppercase tracking-[0.14em] text-bark"
         >
           Click or Press Any Key To Focus
         </button>)}

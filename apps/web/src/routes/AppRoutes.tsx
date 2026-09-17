@@ -26,7 +26,7 @@ function RootLayout() {
 
 function AboutPage() {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-3xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
+    <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-3xl flex-col px-4 pb-10 pt-8 text-bark sm:px-8">
       <Helmet>
         <title>About Wakana Type — Hiragana Typing Trainer</title>
         <meta
@@ -41,17 +41,17 @@ function AboutPage() {
         <meta property="og:image" content={`${SITE_URL}/og-practice.png`} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+      <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">About</h1>
-        <p className="mt-4 text-ink-500">
+        <p className="mt-4 text-sage">
           Wakana Type is a focused hiragana trainer built around accuracy first. Instead of pushing speed,
           each round helps you reduce errors and build consistent romaji to kana input habits.
         </p>
-        <p className="mt-3 text-ink-500">
+        <p className="mt-3 text-sage">
           You can practice by kana families, monitor your accuracy in real time, and see exactly how many
           mistakes were made in a round.
         </p>
-        <p className="mt-3 text-ink-500">
+        <p className="mt-3 text-sage">
           Sentence data comes from{' '}
           <a className="text-cyan-300 hover:text-cyan-200" href="https://tatoeba.org">
             Tatoeba

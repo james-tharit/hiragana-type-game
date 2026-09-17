@@ -8,7 +8,7 @@ const FAMILIES = ['Monographs', 'Diacritics', 'Digraphs'] as const;
 
 export function KanaIndexPage() {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-3xl flex-col px-4 pb-10 pt-8 text-ink-100 sm:px-8">
+    <main className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-3xl flex-col px-4 pb-10 pt-8 text-bark sm:px-8">
       <Helmet>
         <title>Hiragana Chart with Romaji — All 46 Characters | Wakana Type</title>
         <meta
@@ -36,9 +36,9 @@ export function KanaIndexPage() {
         </script>
       </Helmet>
 
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+      <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Hiragana Chart</h1>
-        <p className="mt-2 text-sm text-ink-500">
+        <p className="mt-2 text-sm text-sage">
           All standard hiragana with romaji. Click any row to open a focused typing drill.
         </p>
 
@@ -46,7 +46,7 @@ export function KanaIndexPage() {
           const familyGroups = GROUPS.filter((g) => g.family === family);
           return (
             <section key={family} className="mt-8">
-              <h2 className="mb-3 text-base font-semibold uppercase tracking-widest text-ink-500">
+              <h2 className="mb-3 text-base font-semibold uppercase tracking-widest text-sage">
                 {family}
               </h2>
               <div className="flex flex-col gap-2">
@@ -54,16 +54,16 @@ export function KanaIndexPage() {
                   <Link
                     key={group.id}
                     to={`/group/${group.id}`}
-                    className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 transition hover:border-white/20 hover:bg-white/10"
+                    className="flex items-center gap-4 rounded-xl border border-moss/20 bg-sand/60 px-4 py-3 transition hover:border-moss/30 hover:bg-sand"
                   >
-                    <span className="w-24 shrink-0 font-mono text-xs text-ink-500">
+                    <span className="w-24 shrink-0 font-mono text-xs text-sage">
                       {group.label}
                     </span>
                     <span className="flex flex-wrap gap-x-4 gap-y-1">
                       {group.entries.map((e) => (
                         <span key={e.kana} className="flex flex-col items-center leading-tight">
                           <span className="text-xl">{e.kana}</span>
-                          <span className="text-[10px] text-ink-500">{e.romaji}</span>
+                          <span className="text-[10px] text-sage">{e.romaji}</span>
                         </span>
                       ))}
                     </span>
