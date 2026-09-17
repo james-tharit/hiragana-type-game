@@ -104,7 +104,14 @@ function TypingCanvas({
         className="relative mb-6 min-h-[17rem] rounded-2xl border border-moss/20 bg-cream p-8 outline-none transition focus:border-moss/50 sm:p-10"
       >
         <div className={`transition duration-150 ${isFocused ? 'opacity-100 blur-0' : 'opacity-70 blur-[1.2px]'}`}>
-          <div className="relative flex flex-wrap gap-x-2 gap-y-3 text-4xl leading-tight sm:text-5xl">
+          {/* rt is pinned to 0.5em/1.2 so the annotation band is exactly 0.6em
+              tall; the hidden state pads that same 0.6em back so toggling the
+              topline never shifts the prompt. */}
+          <div
+            className={`relative flex flex-wrap gap-x-2 gap-y-3 text-4xl leading-tight sm:text-5xl [&_rt]:text-[0.5em] [&_rt]:leading-[1.2] ${
+              toplineVisible ? '' : 'pt-[0.6em]'
+            }`}
+          >
             {segments
               ? segments.map((segment, segmentIndex) => {
                   if (!toplineVisible) {
