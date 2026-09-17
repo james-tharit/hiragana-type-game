@@ -16,7 +16,7 @@ pnpm workspace. One deployable app; the packages exist to keep Arcade's engine
 out of the app's way, not to be published.
 
 - `apps/web` — the Vite app, its build config, and everything only it uses
-  (`TypingCanvas`, `useTypingEngine`, sentence data, `speech.ts`, the pages).
+  (`TypingCanvas`, `useTypingEngine`, sentence data, `audio.ts`, the pages).
 - `packages/core` (`@wakana/core`) — what Arcade and the app genuinely share:
   `kanaGroups`, `FilterContext`, `CharacterFilter`. Its `@wakana/core/kana`
   subpath is a React-free entry point for build tooling, which Node's ESM
@@ -44,7 +44,8 @@ thin package hide behind a thick one.
    ~30MB to a temp dir. The script is the only way to change that file;
    hand-editing it makes the filters a lie.
 
-   An entry is `{ id, segments, translation }` and **everything else derives
+   An entry is `{ id, segments, translation }` (plus `audio` when a recording
+   exists, see below) and **everything else derives
    from `segments`** — `sentenceText()` for what is displayed, and
    `sentenceReading()` for what is typed. There is deliberately no stored
    `text` field: a second copy would drift.
@@ -81,10 +82,29 @@ thin package hide behind a thick one.
 
    Study aids: the translation sits below the sentence and starts VISIBLE,
    with a toggle to hide it, resetting to visible on every new sentence. A
-   Listen button reads the Japanese aloud via `apps/web/src/lib/speech.ts`, a
-   thin wrapper over the browser's `SpeechSynthesis`. That button is absent —
-   not disabled — when no Japanese voice exists, which is the normal case on
-   Linux.
+   Listen button plays the sentence's own Tatoeba recording via
+   `apps/web/src/lib/audio.ts`, streamed at click time from
+   `https://tatoeba.org/audio/download/{audioId}`. Speech synthesis was tried
+   and removed: a machine voice reading `は` as `wa` contradicts what the
+   typist is spelling, and no Japanese voice exists on Linux anyway.
+
+   The URL is keyed by the **recording's** audio id, not the sentence id —
+   `audio.tatoeba.org/sentences/jpn/{sentenceId}.mp3` serves only a handful of
+   old recordings and 403s for the rest. So an entry carries
+   `audio: { id, by, license }`, and only when a recording exists: no `audio`
+   key means the Listen button renders `disabled` with a tooltip rather than
+   disappearing. `license` is often an empty string — many recordings carry no
+   tag — and the credit line degrades to the contributor alone.
+
+   Recordings are their contributors' own licenses (mostly CC BY-NC 4.0),
+   separate from the sentence text's CC-BY 2.0 FR, so attribution is
+   per-sentence next to the button as well as on `/about`.
+
+   The refresh script ranks audio-backed sentences ahead of silent ones when
+   filling CAP, which is a preference, not a filter: the suitability,
+   known-word and kana-reading gates still decide what is eligible. Today all
+   300 survive with audio, so the disabled path is unreachable from the
+   committed data and only the test fixtures exercise it.
 
    Skip and Restart are different things here: Skip loads a new sentence,
    Restart retries the current one. `SentencePage` therefore passes no

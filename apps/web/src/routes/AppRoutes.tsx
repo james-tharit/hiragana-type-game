@@ -56,7 +56,9 @@ function AboutPage() {
           <a className="text-cyan-300 hover:text-cyan-200" href="https://tatoeba.org">
             Tatoeba
           </a>{' '}
-          and is used under the CC-BY 2.0 FR license.
+          and is used under the CC-BY 2.0 FR license. Audio recordings are contributed by its members
+          under their own licenses, most commonly CC BY-NC 4.0; each recording&rsquo;s contributor and
+          license are credited on the sentence it belongs to.
         </p>
         <p className="mt-6">
           <Link className="text-cyan-300 hover:text-cyan-200" to="/practice">

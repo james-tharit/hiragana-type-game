@@ -3,11 +3,26 @@ import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import sentencesData from '../data/sentences.json';
 import { sentenceToEntries } from '../data/sentences';
-import { sentenceReading, sentenceText, type Segment } from '../data/furigana';
-import * as speech from '../lib/speech';
+import { sentenceReading, type Segment } from '../data/furigana';
 import { SentencePage } from './SentencePage';
 
-vi.mock('../lib/speech');
+// Index 150 (SECOND) gets an `audio` key with an empty license, index 200
+// (THIRD) gets one with a license, and index 0 (FIRST) has its audio stripped
+// so the no-audio path stays testable — the real pool is audio-backed
+// throughout, since the refresh script ranks recorded sentences first.
+vi.mock('../data/sentences.json', async (importOriginal) => {
+  const actual = (await importOriginal()) as { default: Array<Record<string, unknown>> };
+  const data = actual.default.map((entry, i) => {
+    if (i === 0) {
+      const { audio: _noAudio, ...rest } = entry;
+      return rest;
+    }
+    if (i === 150) return { ...entry, audio: { id: 999150, by: 'CK', license: '' } };
+    if (i === 200) return { ...entry, audio: { id: 999200, by: 'yomi', license: 'CC BY-NC 4.0' } };
+    return entry;
+  });
+  return { default: data };
+});
 
 const renderPage = () =>
   render(
@@ -82,23 +97,62 @@ describe('SentencePage', () => {
     expect(screen.getByRole('button', { name: /hide translation/i })).toBeInTheDocument();
   });
 
-  it('speaks the current sentence text (not the reading) in Japanese when Listen is clicked', () => {
-    vi.mocked(speech.canSpeakJapanese).mockReturnValue(true);
+  it('plays the current sentence audio when Listen is clicked', () => {
+    const play = vi
+      .spyOn(window.HTMLMediaElement.prototype, 'play')
+      .mockResolvedValue(undefined);
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     renderPage();
 
     fireEvent.click(screen.getByRole('button', { name: /listen/i }));
 
-    expect(speech.speak).toHaveBeenCalledTimes(1);
-    expect(speech.speak).toHaveBeenCalledWith(sentenceText(SECOND.segments));
+    expect(play).toHaveBeenCalledTimes(1);
+    const audio = play.mock.instances[0] as unknown as HTMLAudioElement;
+    expect(audio.src).toBe('https://tatoeba.org/audio/download/999150');
   });
 
-  it('renders no Listen button when the browser cannot speak Japanese', () => {
-    vi.mocked(speech.canSpeakJapanese).mockReturnValue(false);
-    vi.spyOn(Math, 'random').mockReturnValue(0);
+  it('disables Listen with a tooltip when the sentence has no recorded audio', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0); // FIRST has no audio key
     renderPage();
 
-    expect(screen.queryByRole('button', { name: /listen/i })).not.toBeInTheDocument();
+    const listenButton = screen.getByRole('button', { name: /listen/i });
+    expect(listenButton).toBeDisabled();
+    expect(listenButton).toHaveAttribute('title', 'Audio is not available for this sentence');
+  });
+
+  it('enables Listen with no tooltip when the sentence has recorded audio', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // SECOND has an audio key
+    renderPage();
+
+    const listenButton = screen.getByRole('button', { name: /listen/i });
+    expect(listenButton).not.toBeDisabled();
+    expect(listenButton).not.toHaveAttribute('title');
+  });
+
+  it('credits the recording contributor and license near Listen when the sentence has audio', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.6667); // THIRD has audio with a license
+    renderPage();
+
+    const credit = screen.getByTestId('audio-credit');
+    expect(credit).toHaveTextContent('yomi');
+    expect(credit).toHaveTextContent('CC BY-NC 4.0');
+  });
+
+  it('credits just the contributor, with no dangling separator or "undefined", when the recording has no license', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // SECOND has audio, license: ''
+    renderPage();
+
+    const credit = screen.getByTestId('audio-credit');
+    expect(credit).toHaveTextContent('CK');
+    expect(credit.textContent).not.toMatch(/undefined/);
+    expect(credit.textContent?.trim()).not.toMatch(/[·-]\s*$/);
+  });
+
+  it('renders no credit line when the sentence has no recorded audio', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0); // FIRST has no audio key
+    renderPage();
+
+    expect(screen.queryByTestId('audio-credit')).not.toBeInTheDocument();
   });
 
   it('does not render the CharacterFilter kana-group picker', () => {

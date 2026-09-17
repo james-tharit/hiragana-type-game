@@ -16,6 +16,7 @@ const FILES = {
   jpn: 'per_language/jpn/jpn_sentences.tsv.bz2',
   links: 'per_language/jpn/jpn-eng_links.tsv.bz2',
   eng: 'per_language/eng/eng_sentences.tsv.bz2',
+  audio: 'per_language/jpn/jpn_sentences_with_audio.tsv.bz2',
 } as const;
 
 const MIN_ENTRIES = 4;
@@ -44,17 +45,44 @@ function readingOf(token: { reading?: string; surface_form: string }): string {
   return toHiragana(token.reading ?? token.surface_form);
 }
 
+// jpn_sentences_with_audio.tsv columns: sentenceId, audioId, username, license, attributionUrl.
+// Only sentenceId (lookup key) and username are guaranteed present; license is often empty.
+export function parseAudioTsv(
+  lines: Iterable<string>,
+): Map<string, { id: number; by: string; license: string }> {
+  const audioById = new Map<string, { id: number; by: string; license: string }>();
+  for (const line of lines) {
+    if (!line) continue;
+    const [sentenceId, audioId, by, license = ''] = line.split('\t');
+    audioById.set(sentenceId, { id: Number(audioId), by, license });
+  }
+  return audioById;
+}
+
+// Audio coverage is a preference, not a filter: audio-backed candidates are
+// tried first so they win the CAP, but candidates without audio still fill
+// out the round when there aren't enough of the former.
+export function byAudioFirst<T>(ids: T[], hasAudio: (id: T) => boolean): T[] {
+  const withAudio: T[] = [];
+  const withoutAudio: T[] = [];
+  for (const id of ids) (hasAudio(id) ? withAudio : withoutAudio).push(id);
+  return [...withAudio, ...withoutAudio];
+}
+
 async function main() {
   const dir = mkdtempSync(path.join(tmpdir(), 'tatoeba-'));
   try {
     const jpnPath = download(dir, 'jpn', FILES.jpn);
     const linksPath = download(dir, 'links', FILES.links);
     const engPath = download(dir, 'eng', FILES.eng);
+    const audioPath = download(dir, 'audio', FILES.audio);
+    const audioById = parseAudioTsv(readFileSync(audioPath, 'utf8').split('\n'));
 
     for (const [label, p] of [
       ['jpn_sentences', jpnPath],
       ['jpn-eng_links', linksPath],
       ['eng_sentences', engPath],
+      ['jpn_sentences_with_audio', audioPath],
     ] as const) {
       const head = readFileSync(p, 'utf8').split('\n', 2).join('\n');
       console.log(`--- ${label} head ---\n${head}`);
@@ -92,11 +120,18 @@ async function main() {
     let tokenized = 0;
     let alignable = 0;
     let withinLength = 0;
-    type Row = { id: number; segments: Segment[]; translation: string };
+    type Row = {
+      id: number;
+      segments: Segment[];
+      translation: string;
+      audio?: { id: number; by: string; license: string };
+    };
     const rows: Row[] = [];
     const seenText = new Set<string>();
 
-    for (const [jpnId, text] of jpnText) {
+    const orderedIds = byAudioFirst([...jpnText.keys()], (id) => audioById.has(id));
+    for (const jpnId of orderedIds) {
+      const text = jpnText.get(jpnId)!;
       if (rows.length >= CAP) break;
 
       const engId = linkedEngId.get(jpnId);
@@ -121,7 +156,8 @@ async function main() {
       withinLength++;
 
       seenText.add(text);
-      rows.push({ id: Number(jpnId), segments, translation });
+      const audio = audioById.get(jpnId);
+      rows.push({ id: Number(jpnId), segments, translation, ...(audio && { audio }) });
     }
 
     rows.sort((a, b) => a.id - b.id);
@@ -136,4 +172,4 @@ async function main() {
   }
 }
 
-main();
+if (import.meta.main) main();

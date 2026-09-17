@@ -3,14 +3,19 @@ import { Helmet } from 'react-helmet-async';
 import StatsDisplay from '../components/StatsDisplay';
 import TypingCanvas from '../components/TypingCanvas';
 import { sentenceToEntries } from '../data/sentences';
-import { sentenceReading, sentenceText, toRubySegments, type Segment } from '../data/furigana';
+import { sentenceReading, toRubySegments, type Segment } from '../data/furigana';
 import sentencesData from '../data/sentences.json';
 import { useTypingEngine } from '../hooks/useTypingEngine';
-import { canSpeakJapanese, speak } from '../lib/speech';
+import { playSentenceAudio } from '../lib/audio';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
-type Sentence = { id: number; segments: Segment[]; translation: string };
+type Sentence = {
+  id: number;
+  segments: Segment[];
+  translation: string;
+  audio?: { id: number; by: string; license: string };
+};
 
 const sentences = sentencesData as Sentence[];
 
@@ -28,7 +33,6 @@ export function SentencePage() {
   const [sentence, setSentence] = useState(() => pickSentence());
   const [tokens, setTokens] = useState(() => sentenceToEntries(sentenceReading(sentence.segments)));
   const [translationRevealed, setTranslationRevealed] = useState(true);
-  const canSpeak = canSpeakJapanese();
   const rubySegments = useMemo(() => toRubySegments(sentence.segments), [sentence.segments]);
 
   const loadSentence = (next: Sentence) => {
@@ -101,23 +105,31 @@ export function SentencePage() {
         <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
           <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sentence Practice</h1>
-            <div className="flex gap-2">
-              {canSpeak && (
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => speak(sentenceText(sentence.segments))}
-                  className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40"
+                  onClick={() => sentence.audio && playSentenceAudio(sentence.audio.id)}
+                  disabled={!sentence.audio}
+                  title={sentence.audio ? undefined : 'Audio is not available for this sentence'}
+                  className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Listen
                 </button>
+                <button
+                  type="button"
+                  onClick={nextSentence}
+                  className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40"
+                >
+                  Skip
+                </button>
+              </div>
+              {sentence.audio && (
+                <p className="text-sm text-sage" data-testid="audio-credit">
+                  Audio by {sentence.audio.by}
+                  {sentence.audio.license ? ` · ${sentence.audio.license}` : ''}
+                </p>
               )}
-              <button
-                type="button"
-                onClick={nextSentence}
-                className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40"
-              >
-                Skip
-              </button>
             </div>
           </header>
 
