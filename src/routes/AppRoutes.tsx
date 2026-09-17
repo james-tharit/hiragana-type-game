@@ -6,6 +6,7 @@ import { FilterProvider } from '../contexts/FilterContext';
 import { ArcadePage } from '../pages/ArcadePage';
 import { KanaIndexPage } from '../pages/KanaIndexPage';
 import { PracticePage } from '../pages/PracticePage';
+import { SentencePage } from '../pages/SentencePage';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
@@ -49,6 +50,13 @@ function AboutPage() {
         <p className="mt-3 text-ink-500">
           You can practice by kana families, monitor your accuracy in real time, and see exactly how many
           mistakes were made in a round.
+        </p>
+        <p className="mt-3 text-ink-500">
+          Sentence data comes from{' '}
+          <a className="text-cyan-300 hover:text-cyan-200" href="https://tatoeba.org">
+            Tatoeba
+          </a>{' '}
+          and is used under the CC-BY 2.0 FR license.
         </p>
         <p className="mt-6">
           <Link className="text-cyan-300 hover:text-cyan-200" to="/practice">
@@ -100,6 +108,7 @@ export function AppRoutes() {
         <Route path="/practice" element={<PracticePage />} />
         <Route path="/arcade" element={<ArcadePage />} />
         <Route path="/kana" element={<KanaIndexPage />} />
+        <Route path="/sentences" element={<SentencePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/group/:id" element={<GroupPage />} />
         <Route path="*" element={<Navigate to="/practice" replace />} />

@@ -73,6 +73,10 @@ so this is one line.
 
 ## Phase 2 — Sentence mode
 
+Sentences already mix hiragana and katakana, so the Phase 1 script selector does
+**not** apply here — `SentencePage` passes the identity case and renders no kana
+filter. A sentence is not drawn from a kana pool.
+
 ### 2.1 `isKanaOnly(text)`
 
 `src/data/sentences.ts`. True only for hiragana/katakana/ー plus `、。！？` and
@@ -86,8 +90,12 @@ The one real algorithm here. Split a kana sentence into mora and pair each with
 its romaji via wanakana `toRomaji`:
 
 - digraphs: `きゃ` is **one** entry, not two (small ゃゅょぁぃぅぇぉ attach left)
+- long vowel: `ー` also attaches left, so `コー` is one entry
 - sokuon: `っ` attaches to the **following** mora so `っか` → `kka`
 - punctuation and spaces are skipped entirely, never typed
+
+wanakana's output is typeable ASCII throughout — verified: `コー` → `koo`, not
+`kō`. No macron handling needed, so don't build any.
 
 Accept: `きゃ` → 1 entry `kya`; `がっこう` → `ga/kko/u`; `ねこ。` → 2 entries, the
 `。` absent. This is the behavior most likely to be wrong — give it the fullest
@@ -95,11 +103,23 @@ test table of any cycle.
 
 ### 2.3 Refresh script + committed data
 
-`scripts/refresh-sentences.ts`, wired as `npm run sentences:refresh`. Pulls the
-Tatoeba jpn sentences + eng links export, filters with `isKanaOnly`, caps the
-pool, writes `src/data/sentences.json` as `{ id, text, translation }[]`.
+`scripts/refresh-sentences.ts`, wired as `npm run sentences:refresh`. Downloads
+to a temp dir, filters with `isKanaOnly`, caps the pool, writes
+`src/data/sentences.json` as `{ id, text, translation }[]`, deletes the temp dir.
 
-Not part of the app bundle path; exclude from coverage. Commit the JSON.
+Three exports, ~30MB total, sizes confirmed 2026-09-16:
+
+| File | Size | Why |
+|---|---|---|
+| `per_language/jpn/jpn_sentences.tsv.bz2` | 3.4 MB | the sentences |
+| `per_language/jpn/jpn-eng_links.tsv.bz2` | 1.5 MB | jpn id → eng id |
+| `per_language/eng/eng_sentences.tsv.bz2` | 24.9 MB | the translations |
+
+all under `https://downloads.tatoeba.org/exports/`. Do **not** use the top-level
+`links.tar.bz2` — it is 150MB and the per-language file is the same mapping.
+
+Not part of the app bundle path; exclude from coverage. Commit the JSON, never
+the downloads.
 
 Accept: running it produces a non-empty JSON where every `text` passes
 `isKanaOnly`; the app builds with the network unplugged.
@@ -124,6 +144,19 @@ CC-BY 2.0 FR attribution for Tatoeba on `/about`.
 
 Accept: `/sentences` reachable from the nav, present in prerender routes,
 attribution visible on About.
+
+### 2.6 Content filter
+
+Tatoeba is unfiltered crowd-sourced text. `isSuitable(translation)` in
+`src/data/sentences.ts` drops profanity and violent content during refresh.
+
+Word-boundary matching (`\b`, case-insensitive) against a deliberately short
+blocklist — substring matching silently guts the pool, dropping "Hello" for
+*hell* and "diet" for *die*. The invariant test pins the pool at 300 entries so
+an over-broad blocklist fails loudly rather than quietly shrinking the data.
+
+Accept: "Hello, Tom." and "I'm on a diet." survive; "I'm gonna shoot him." does
+not; regenerated pool is 300 entries all passing `isSuitable`.
 
 ---
 

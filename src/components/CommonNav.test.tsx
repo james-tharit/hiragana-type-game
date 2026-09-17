@@ -15,11 +15,17 @@ describe('CommonNav', () => {
     expect(screen.getByText('Wakana Type')).toBeInTheDocument();
   });
 
-  it('renders Practice, Arcade, and About links', () => {
+  it('renders Practice, Arcade, Sentences, and About links', () => {
     renderNav();
     expect(screen.getByRole('link', { name: 'Practice' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Arcade' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sentences' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
+  });
+
+  it('links the Sentences tab to /sentences', () => {
+    renderNav();
+    expect(screen.getByRole('link', { name: 'Sentences' })).toHaveAttribute('href', '/sentences');
   });
 
   it('links point to the correct hrefs', () => {
