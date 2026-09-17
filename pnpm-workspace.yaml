@@ -1,9 +1,5 @@
 allowBuilds:
-  esbuild: false
-  # puppeteer's build script downloads the Chromium that vite-plugin-prerender
-  # drives at build time. Disabling it makes `vite build` exit 1 on a fresh
-  # install, which fails the Vercel deploy.
-  puppeteer: true
+  puppeteer: true 
 
 packages:
   - apps/*
