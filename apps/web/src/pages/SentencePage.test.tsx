@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { HelmetProvider } from 'react-helmet-async';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import sentencesData from '../data/sentences.json';
@@ -97,18 +97,60 @@ describe('SentencePage', () => {
     expect(screen.getByRole('button', { name: /hide translation/i })).toBeInTheDocument();
   });
 
-  it('plays the current sentence audio when Listen is clicked', () => {
+  it('plays the current sentence audio when Listen is clicked', async () => {
     const play = vi
       .spyOn(window.HTMLMediaElement.prototype, 'play')
       .mockResolvedValue(undefined);
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
     renderPage();
 
-    fireEvent.click(screen.getByRole('button', { name: /listen/i }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /listen/i }));
+    });
 
     expect(play).toHaveBeenCalledTimes(1);
     const audio = play.mock.instances[0] as unknown as HTMLAudioElement;
     expect(audio.src).toBe('https://tatoeba.org/audio/download/999150');
+  });
+
+  it('shows a loading state on Listen until playback actually starts, then returns to normal', async () => {
+    let resolvePlay!: () => void;
+    const playPromise = new Promise<void>((resolve) => {
+      resolvePlay = resolve;
+    });
+    vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockReturnValue(playPromise);
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // SECOND has audio
+    renderPage();
+
+    const listenButton = screen.getByRole('button', { name: /listen/i });
+    fireEvent.click(listenButton);
+
+    expect(listenButton).toBeDisabled();
+    expect(listenButton).toHaveTextContent(/loading/i);
+
+    await act(async () => {
+      resolvePlay();
+      await playPromise;
+    });
+
+    await waitFor(() => expect(listenButton).not.toBeDisabled());
+    expect(listenButton).toHaveTextContent(/^listen$/i);
+  });
+
+  it('clears the loading state on Listen even when playback fails, e.g. blocked autoplay', async () => {
+    vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockRejectedValue(
+      new Error('blocked'),
+    );
+    vi.spyOn(Math, 'random').mockReturnValue(0.5); // SECOND has audio
+    renderPage();
+
+    const listenButton = screen.getByRole('button', { name: /listen/i });
+    await act(async () => {
+      fireEvent.click(listenButton);
+    });
+
+    await waitFor(() => expect(listenButton).not.toBeDisabled());
+    expect(listenButton).toHaveTextContent(/^listen$/i);
   });
 
   it('disables Listen with a tooltip when the sentence has no recorded audio', () => {

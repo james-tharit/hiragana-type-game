@@ -33,6 +33,7 @@ export function SentencePage() {
   const [sentence, setSentence] = useState(() => pickSentence());
   const [tokens, setTokens] = useState(() => sentenceToEntries(sentenceReading(sentence.segments)));
   const [translationRevealed, setTranslationRevealed] = useState(true);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const rubySegments = useMemo(() => toRubySegments(sentence.segments), [sentence.segments]);
 
   const loadSentence = (next: Sentence) => {
@@ -54,6 +55,18 @@ export function SentencePage() {
     toplineVisible,
     toggleTopline,
   } = useTypingEngine(tokens, undefined, true);
+
+  const handleListen = async () => {
+    if (!sentence.audio) return;
+    setIsLoadingAudio(true);
+    try {
+      await playSentenceAudio(sentence.audio.id);
+    } catch {
+      // playback failed (offline, blocked autoplay) — loading state still clears below
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
 
   const nextSentence = () => {
     loadSentence(pickSentence(sentence.id));
@@ -109,12 +122,12 @@ export function SentencePage() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => sentence.audio && playSentenceAudio(sentence.audio.id)}
-                  disabled={!sentence.audio}
+                  onClick={handleListen}
+                  disabled={!sentence.audio || isLoadingAudio}
                   title={sentence.audio ? undefined : 'Audio is not available for this sentence'}
                   className="rounded-xl border border-moss/30 bg-sand px-4 py-2 text-sm font-medium text-bark transition hover:bg-leaf/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Listen
+                  {isLoadingAudio ? 'Loading…' : 'Listen'}
                 </button>
                 <button
                   type="button"
