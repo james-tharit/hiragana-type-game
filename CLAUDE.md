@@ -18,9 +18,12 @@ out of the app's way, not to be published.
 - `apps/web` — the Vite app, its build config, and everything only it uses
   (`TypingCanvas`, `useTypingEngine`, sentence data, `audio.ts`, the pages).
 - `packages/core` (`@wakana/core`) — what Arcade and the app genuinely share:
-  `kanaGroups`, `FilterContext`, `CharacterFilter`. Its `@wakana/core/kana`
-  subpath is a React-free entry point for build tooling, which Node's ESM
-  loader parses directly and so cannot follow `.tsx` through the barrel.
+  `kanaGroups`, `FilterContext`, `CharacterFilter`. Build tooling that runs
+  before the bundler — `ssg/prerender-routes.ts`, loaded inside
+  `vite.config.ts` — must import `kanaGroups` by **relative path**, not by the
+  `@wakana/core` specifier: vite externalises bare specifiers when it bundles
+  the config, and Node then has to parse the raw `.ts` itself, which only a
+  Node new enough to strip types can do (Vercel's is not).
 - `packages/arcade` (`@wakana/arcade`) — the T-Rex runner: `engine.ts`,
   `DinoGameCanvas`, `ArcadePage`.
 

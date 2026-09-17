@@ -26,9 +26,6 @@
       ],
       "@wakana/arcade": [
         "./packages/arcade/src"
-      ],
-      "@wakana/core/kana": [
-        "./packages/core/src/kanaGroups.ts"
       ]
     },
     "allowImportingTsExtensions": true
