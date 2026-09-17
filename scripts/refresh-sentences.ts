@@ -3,7 +3,7 @@ import { createReadStream, mkdtempSync, readFileSync, rmSync, writeFileSync } fr
 import { createInterface } from 'node:readline';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { isKanaOnly, isSuitable, sentenceToEntries } from '../src/data/sentences.ts';
+import { isKanaOnly, isSuitable, sentenceToEntries } from '../apps/web/src/data/sentences.ts';
 
 const BASE = 'https://downloads.tatoeba.org/exports';
 const FILES = {

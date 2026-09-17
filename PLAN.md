@@ -71,7 +71,7 @@ so this is one line.
 
 ---
 
-## Phase 2 — Sentence mode
+## Phase 2 — Sentence mode — SHIPPED
 
 Sentences already mix hiragana and katakana, so the Phase 1 script selector does
 **not** apply here — `SentencePage` passes the identity case and renders no kana
@@ -157,6 +157,57 @@ an over-broad blocklist fails loudly rather than quietly shrinking the data.
 
 Accept: "Hello, Tom." and "I'm on a diet." survive; "I'm gonna shoot him." does
 not; regenerated pool is 300 entries all passing `isSuitable`.
+
+---
+
+## Phase 3 — Sentence-mode study aids — SHIPPED
+
+Reference point: Taipingu. Three asks, but two were already half-built — read the
+existing code before assuming anything here is new.
+
+### 3.1 Ungate the romaji hint
+
+`TypingCanvas` already renders a "Reveal target" button (and a Spacebar binding)
+showing the current mora's romaji — but only `hasFailedOnce`. Drop that gate so
+it is available from the start.
+
+`TypingCanvas` is shared, so this also ungates Practice. Deliberate: a prop to
+preserve Practice's stricter gate is config for a difference nobody asked for.
+One boolean prop reverses it if that turns out wrong.
+
+Accept: the reveal button renders before any mistake is made; revealing still
+shows only the current mora.
+
+### 3.2 `speak()` helper
+
+`src/lib/speech.ts`, wrapping the browser's `SpeechSynthesis` API — native
+platform feature, no dependency.
+
+- `speak(text)` utters the text with `lang = 'ja-JP'`
+- `canSpeakJapanese()` reports whether synthesis and a Japanese voice exist
+
+Its own module rather than inline in the page, because jsdom has no
+`speechSynthesis` and a seam makes it stubbable.
+
+Accept: absent API returns false instead of throwing; a queued utterance cancels
+a previous one rather than overlapping.
+
+### 3.3 Translation behind a toggle
+
+`SentencePage` shows `sentence.translation` unconditionally today. Start hidden,
+reveal on click — reading the English first defeats the exercise. Resets to
+hidden on each new sentence.
+
+Accept: translation absent until the toggle is pressed; hidden again after Skip.
+
+### 3.4 Listen button
+
+Speaker button on `SentencePage` calling `speak(sentence.text)`. Hidden entirely
+when `canSpeakJapanese()` is false — a button that silently does nothing is worse
+than no button. Japanese voice availability is OS-dependent and often absent on
+Linux, so the disabled path is the common one, not an edge case.
+
+Accept: click utters the sentence text; no Japanese voice means no button.
 
 ---
 
