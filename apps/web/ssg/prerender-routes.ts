@@ -4,7 +4,7 @@
 import { GROUPS } from '../../../packages/core/src/kanaGroups';
 
 export async function getPrerenderRoutes(): Promise<string[]> {
-  const staticRoutes = ['/', '/practice', '/arcade', '/about', '/kana', '/sentences'];
+  const staticRoutes = ['/', '/practice', '/arcade', '/arcade/slider', '/about', '/kana', '/sentences'];
   const groupRoutes = GROUPS.map((group) => `/group/${group.id}`);
 
   return [...staticRoutes, ...groupRoutes];

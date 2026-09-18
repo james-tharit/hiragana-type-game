@@ -45,6 +45,13 @@ describe('AppRoutes', () => {
     });
   });
 
+  describe('route "/arcade/slider"', () => {
+    it('renders the Kana Slider page', () => {
+      renderAt('/arcade/slider');
+      expect(screen.getByRole('heading', { name: /kana slider/i })).toBeInTheDocument();
+    });
+  });
+
   describe('route "/kana"', () => {
     it('renders the Kana Index page', () => {
       renderAt('/kana');

@@ -4,6 +4,7 @@ import { CommonNav } from '../components/CommonNav';
 import { GROUPS } from '@wakana/core';
 import { FilterProvider } from '@wakana/core';
 import { ArcadePage } from '@wakana/arcade';
+import { ArcadeSliderPage } from '../pages/ArcadeSliderPage';
 import { KanaIndexPage } from '../pages/KanaIndexPage';
 import { PracticePage } from '../pages/PracticePage';
 import { SentencePage } from '../pages/SentencePage';
@@ -109,6 +110,7 @@ export function AppRoutes() {
         <Route path="/" element={<Navigate to="/practice" replace />} />
         <Route path="/practice" element={<PracticePage />} />
         <Route path="/arcade" element={<ArcadePage />} />
+        <Route path="/arcade/slider" element={<ArcadeSliderPage />} />
         <Route path="/kana" element={<KanaIndexPage />} />
         <Route path="/sentences" element={<SentencePage />} />
         <Route path="/about" element={<AboutPage />} />
