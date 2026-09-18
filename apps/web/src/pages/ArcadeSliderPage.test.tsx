@@ -78,6 +78,35 @@ describe('ArcadeSliderPage', () => {
     expect(track.children.length).toBeGreaterThan(ROUND_SIZE);
   });
 
+  it('shows a live readout of kana cleared and accuracy that updates as the reader types', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const track = screen.getByTestId('kana-slider-track');
+
+    expect(screen.getByTestId('slider-cleared')).toHaveTextContent('0');
+    expect(screen.getByTestId('slider-accuracy')).toHaveTextContent('100%');
+
+    const current = track.querySelector('[aria-current="true"]');
+    const romaji = romajiFor(current!.textContent!);
+    await user.keyboard(romaji);
+
+    expect(screen.getByTestId('slider-cleared')).toHaveTextContent('1');
+    expect(screen.getByTestId('slider-accuracy')).toHaveTextContent('100%');
+
+    const nowCurrent = track.querySelector('[aria-current="true"]');
+    const nowRomaji = romajiFor(nowCurrent!.textContent!);
+    const wrongKey = 'aeioukstnhmyrwgzdbpj'
+      .split('')
+      .find((letter) => !nowRomaji.startsWith(letter));
+    expect(wrongKey).toBeDefined();
+    await user.keyboard(wrongKey!);
+
+    expect(screen.getByTestId('slider-cleared')).toHaveTextContent('1');
+    const accuracyText = screen.getByTestId('slider-accuracy').textContent!;
+    expect(Number.parseInt(accuracyText, 10)).toBeLessThan(100);
+  });
+
   it('restarts the stream from a fresh round when the kana-group filter changes', async () => {
     const user = userEvent.setup();
     renderPage();

@@ -11,7 +11,7 @@ export function ArcadeSliderPage() {
   const { selectedGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily, script, setScript } =
     useFilterContext();
   const [tokens, setTokens] = useState(() => createRound(selectedGroupIds));
-  const { index, currentWrong, resetEngine } = useTypingEngine(tokens, () =>
+  const { index, currentWrong, accuracy, resetEngine } = useTypingEngine(tokens, () =>
     setTokens(createRound(selectedGroupIds)),
   );
 
@@ -93,6 +93,18 @@ export function ArcadeSliderPage() {
           <div className="mt-6 overflow-hidden rounded-2xl border border-moss/20 bg-cream">
             <KanaSlider tokens={tokens} script={script} index={index} currentWrong={currentWrong} />
           </div>
+
+          <dl className="mt-4 flex items-center justify-center gap-8 text-sm text-sage">
+            <div className="text-center">
+              <dt className="text-xs uppercase tracking-wide">Cleared</dt>
+              <dd data-testid="slider-cleared" className="text-lg font-semibold text-bark">{index}</dd>
+            </div>
+            <div className="text-center">
+              <dt className="text-xs uppercase tracking-wide">Accuracy</dt>
+              <dd data-testid="slider-accuracy" className="text-lg font-semibold text-bark">{Math.round(accuracy)}%</dd>
+            </div>
+          </dl>
+          <p className="mt-2 text-center text-xs text-sage">Press Space to restart the stream.</p>
         </section>
       </main>
     </>
