@@ -33,6 +33,17 @@ describe('KanaSlider', () => {
         expect(screen.getByTestId('kana-slider-track').style.transform).toBe('translateX(-48px)');
     });
 
+    it('marks the current slot invalid and red when currentWrong is true', () => {
+        render(<KanaSlider tokens={tokens} script="hiragana" index={0} currentWrong />);
+        expect(screen.getByText('あ')).toHaveAttribute('aria-invalid', 'true');
+        expect(screen.getByText('あ')).toHaveClass('text-red-700');
+    });
+
+    it('does not mark the current slot invalid when currentWrong is false', () => {
+        render(<KanaSlider tokens={tokens} script="hiragana" index={0} currentWrong={false} />);
+        expect(screen.getByText('あ')).not.toHaveAttribute('aria-invalid');
+    });
+
     it('renders katakana form when script is katakana', () => {
         render(<KanaSlider tokens={tokens} script="katakana" index={0} />);
         expect(screen.getByText(displayFor('あ', 'katakana'))).toBeInTheDocument();

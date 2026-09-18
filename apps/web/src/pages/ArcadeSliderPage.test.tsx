@@ -33,4 +33,28 @@ describe('ArcadeSliderPage', () => {
     const nowCurrent = track.querySelector('[aria-current="true"]');
     expect(nowCurrent).toBe(track.children[1]);
   });
+
+  it('marks the current kana wrong and does not advance on an invalid keystroke', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const track = screen.getByTestId('kana-slider-track');
+    const current = track.querySelector('[aria-current="true"]');
+    expect(current).not.toBeNull();
+
+    const allEntries = GROUPS.flatMap((g) => g.entries);
+    const entry = allEntries.find((e) => e.kana === current!.textContent);
+    expect(entry).toBeDefined();
+
+    const wrongKey = 'aeioukstnhmyrwgzdbpj'
+      .split('')
+      .find((letter) => !entry!.romaji.startsWith(letter));
+    expect(wrongKey).toBeDefined();
+
+    await user.keyboard(wrongKey!);
+
+    expect(track.style.transform).toBe('translateX(-48px)');
+    const stillCurrent = track.querySelector('[aria-current="true"]');
+    expect(stillCurrent).toHaveAttribute('aria-invalid', 'true');
+  });
 });
