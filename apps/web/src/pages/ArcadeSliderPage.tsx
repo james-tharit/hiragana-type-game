@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { createRound, useFilterContext } from '@wakana/core';
+import KanaSlider from '../components/KanaSlider';
+import { useTypingEngine } from '../hooks/useTypingEngine';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 
 export function ArcadeSliderPage() {
+  const { selectedGroupIds, script } = useFilterContext();
+  const [tokens, setTokens] = useState(() => createRound(selectedGroupIds));
+  const { index } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
+
   return (
     <>
       <Helmet>
@@ -27,6 +35,10 @@ export function ArcadeSliderPage() {
         <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Kana Slider</h1>
           <p className="mt-1 text-sm text-sage">Kana scroll past — type the one in the middle.</p>
+
+          <div className="mt-6 overflow-hidden rounded-2xl border border-moss/20 bg-cream">
+            <KanaSlider tokens={tokens} script={script} index={index} />
+          </div>
         </section>
       </main>
     </>
