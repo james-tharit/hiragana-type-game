@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HelmetProvider } from 'react-helmet-async';
-import { GROUPS } from '@wakana/core';
+import { GROUPS, ROUND_SIZE } from '@wakana/core';
 import { FilterProvider } from '@wakana/core';
 import { ArcadeSliderPage } from './ArcadeSliderPage';
 
@@ -14,6 +14,14 @@ const renderPage = () =>
     </HelmetProvider>,
   );
 
+const allEntries = GROUPS.flatMap((g) => g.entries);
+
+function romajiFor(kana: string): string {
+  const entry = allEntries.find((e) => e.kana === kana);
+  expect(entry).toBeDefined();
+  return entry!.romaji;
+}
+
 describe('ArcadeSliderPage', () => {
   it('advances the strip to the next kana after typing the current one correctly', async () => {
     const user = userEvent.setup();
@@ -23,11 +31,9 @@ describe('ArcadeSliderPage', () => {
     const current = track.querySelector('[aria-current="true"]');
     expect(current).not.toBeNull();
 
-    const allEntries = GROUPS.flatMap((g) => g.entries);
-    const entry = allEntries.find((e) => e.kana === current!.textContent);
-    expect(entry).toBeDefined();
+    const romaji = romajiFor(current!.textContent!);
 
-    await user.keyboard(entry!.romaji);
+    await user.keyboard(romaji);
 
     expect(track.style.transform).toBe('translateX(-144px)');
     const nowCurrent = track.querySelector('[aria-current="true"]');
@@ -42,13 +48,11 @@ describe('ArcadeSliderPage', () => {
     const current = track.querySelector('[aria-current="true"]');
     expect(current).not.toBeNull();
 
-    const allEntries = GROUPS.flatMap((g) => g.entries);
-    const entry = allEntries.find((e) => e.kana === current!.textContent);
-    expect(entry).toBeDefined();
+    const romaji = romajiFor(current!.textContent!);
 
     const wrongKey = 'aeioukstnhmyrwgzdbpj'
       .split('')
-      .find((letter) => !entry!.romaji.startsWith(letter));
+      .find((letter) => !romaji.startsWith(letter));
     expect(wrongKey).toBeDefined();
 
     await user.keyboard(wrongKey!);
@@ -56,5 +60,21 @@ describe('ArcadeSliderPage', () => {
     expect(track.style.transform).toBe('translateX(-48px)');
     const stillCurrent = track.querySelector('[aria-current="true"]');
     expect(stillCurrent).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('appends more kana instead of running out as the reader nears the end of the stream', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const track = screen.getByTestId('kana-slider-track');
+    expect(track.children).toHaveLength(ROUND_SIZE);
+
+    for (let i = 0; i < 21; i += 1) {
+      const current = track.querySelector('[aria-current="true"]');
+      const romaji = romajiFor(current!.textContent!);
+      await user.keyboard(romaji);
+    }
+
+    expect(track.children.length).toBeGreaterThan(ROUND_SIZE);
   });
 });
