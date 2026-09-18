@@ -9,7 +9,7 @@ const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 export function ArcadeSliderPage() {
   const { selectedGroupIds, script } = useFilterContext();
   const [tokens, setTokens] = useState(() => createRound(selectedGroupIds));
-  const { index } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
+  const { index, currentWrong } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
 
   return (
     <>
@@ -37,7 +37,7 @@ export function ArcadeSliderPage() {
           <p className="mt-1 text-sm text-sage">Kana scroll past — type the one in the middle.</p>
 
           <div className="mt-6 overflow-hidden rounded-2xl border border-moss/20 bg-cream">
-            <KanaSlider tokens={tokens} script={script} index={index} />
+            <KanaSlider tokens={tokens} script={script} index={index} currentWrong={currentWrong} />
           </div>
         </section>
       </main>

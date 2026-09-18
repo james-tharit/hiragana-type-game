@@ -5,11 +5,12 @@ type KanaSliderProps = {
   tokens: Entry[];
   script: Script;
   index: number;
+  currentWrong?: boolean;
 };
 
 const SLOT_PX = 96;
 
-function KanaSlider({ tokens, script, index }: KanaSliderProps) {
+function KanaSlider({ tokens, script, index, currentWrong }: KanaSliderProps) {
   return (
     <div className="relative h-32 overflow-hidden">
       <div
@@ -26,8 +27,9 @@ function KanaSlider({ tokens, script, index }: KanaSliderProps) {
           <span
             key={i}
             aria-current={i === index ? 'true' : undefined}
+            aria-invalid={i === index && currentWrong ? 'true' : undefined}
             className={`w-24 flex-none text-center text-5xl transition-colors ${
-              i === index ? 'text-moss' : 'text-sage/50'
+              i === index ? (currentWrong ? 'text-red-700' : 'text-moss') : 'text-sage/50'
             }`}
           >
             {displayFor(token.kana, script)}
