@@ -1,15 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { createRound, useFilterContext } from '@wakana/core';
 import KanaSlider from '../components/KanaSlider';
 import { useTypingEngine } from '../hooks/useTypingEngine';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
+const REFILL_THRESHOLD = 10;
 
 export function ArcadeSliderPage() {
   const { selectedGroupIds, script } = useFilterContext();
   const [tokens, setTokens] = useState(() => createRound(selectedGroupIds));
   const { index, currentWrong } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
+
+  // ponytail: stream only ever grows (never trims the consumed head), so it's
+  // O(session length) in memory/render for a long endless run. Rebase index
+  // and slice off the head if that ever matters — pairs with the
+  // non-virtualised track in KanaSlider.tsx.
+  useEffect(() => {
+    if (index < tokens.length - REFILL_THRESHOLD) return;
+    setTokens((prev) => [...prev, ...createRound(selectedGroupIds)]);
+  }, [index, tokens.length, selectedGroupIds]);
 
   return (
     <>
