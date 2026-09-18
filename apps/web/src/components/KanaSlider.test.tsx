@@ -44,6 +44,20 @@ describe('KanaSlider', () => {
         expect(screen.getByText('あ')).not.toHaveAttribute('aria-invalid');
     });
 
+    // The track shifts by a px constant, so the slots must be sized in px too.
+    // As rem (w-24) the two agree only at a 16px default font size, and the
+    // focused kana drifts out of the frame everywhere else.
+    it('sizes each slot in px so the slot width and the track shift agree', () => {
+        render(<KanaSlider tokens={tokens} script="hiragana" index={2} />);
+
+        const track = screen.getByTestId('kana-slider-track');
+        const slotWidth = Number.parseFloat((track.children[0] as HTMLElement).style.width);
+        const shift = Number.parseFloat(track.style.transform.replace(/[^\d.]/g, ''));
+
+        expect((track.children[0] as HTMLElement).style.width).toBe(`${slotWidth}px`);
+        expect(shift).toBe(2 * slotWidth + slotWidth / 2);
+    });
+
     it('renders katakana form when script is katakana', () => {
         render(<KanaSlider tokens={tokens} script="katakana" index={0} />);
         expect(screen.getByText(displayFor('あ', 'katakana'))).toBeInTheDocument();
