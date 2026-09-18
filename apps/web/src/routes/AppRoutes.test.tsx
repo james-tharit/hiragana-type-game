@@ -52,6 +52,26 @@ describe('AppRoutes', () => {
     });
   });
 
+  describe('arcade mode tabs', () => {
+    it('renders both mode links on /arcade', () => {
+      renderAt('/arcade');
+      expect(screen.getByRole('link', { name: /t-rex runner/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /kana slider/i })).toBeInTheDocument();
+    });
+
+    it('marks the T-Rex link current on /arcade', () => {
+      renderAt('/arcade');
+      expect(screen.getByRole('link', { name: /t-rex runner/i })).toHaveAttribute('aria-current', 'page');
+      expect(screen.getByRole('link', { name: /kana slider/i })).not.toHaveAttribute('aria-current', 'page');
+    });
+
+    it('marks the Kana Slider link current on /arcade/slider', () => {
+      renderAt('/arcade/slider');
+      expect(screen.getByRole('link', { name: /kana slider/i })).toHaveAttribute('aria-current', 'page');
+      expect(screen.getByRole('link', { name: /t-rex runner/i })).not.toHaveAttribute('aria-current', 'page');
+    });
+  });
+
   describe('route "/kana"', () => {
     it('renders the Kana Index page', () => {
       renderAt('/kana');

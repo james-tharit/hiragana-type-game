@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { Link, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
+import { Link, NavLink, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
 import { CommonNav } from '../components/CommonNav';
 import { GROUPS } from '@wakana/core';
 import { FilterProvider } from '@wakana/core';
@@ -22,6 +22,32 @@ function RootLayout() {
       <CommonNav />
       <Outlet />
     </FilterProvider>
+  );
+}
+
+function arcadeNavLinkClass({ isActive }: { isActive: boolean }) {
+  return `rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${
+    isActive ? 'bg-moss text-cream' : 'text-sage hover:bg-sand/60 hover:text-bark'
+  }`;
+}
+
+/**
+ * Arcade layout: nests /arcade and /arcade/slider under a shared mode
+ * switcher so both surfaces stay reachable from one another.
+ */
+function ArcadeLayout() {
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 pt-6 sm:px-8">
+      <nav className="flex items-center gap-1" aria-label="Arcade modes">
+        <NavLink to="/arcade" end className={arcadeNavLinkClass}>
+          T-Rex Runner
+        </NavLink>
+        <NavLink to="/arcade/slider" className={arcadeNavLinkClass}>
+          Kana Slider
+        </NavLink>
+      </nav>
+      <Outlet />
+    </div>
   );
 }
 
@@ -109,8 +135,10 @@ export function AppRoutes() {
       <Route element={<RootLayout />}>
         <Route path="/" element={<Navigate to="/practice" replace />} />
         <Route path="/practice" element={<PracticePage />} />
-        <Route path="/arcade" element={<ArcadePage />} />
-        <Route path="/arcade/slider" element={<ArcadeSliderPage />} />
+        <Route path="/arcade" element={<ArcadeLayout />}>
+          <Route index element={<ArcadePage />} />
+          <Route path="slider" element={<ArcadeSliderPage />} />
+        </Route>
         <Route path="/kana" element={<KanaIndexPage />} />
         <Route path="/sentences" element={<SentencePage />} />
         <Route path="/about" element={<AboutPage />} />
