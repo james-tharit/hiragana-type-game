@@ -77,4 +77,23 @@ describe('ArcadeSliderPage', () => {
 
     expect(track.children.length).toBeGreaterThan(ROUND_SIZE);
   });
+
+  it('restarts the stream from a fresh round when the kana-group filter changes', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const track = screen.getByTestId('kana-slider-track');
+    const current = track.querySelector('[aria-current="true"]');
+    const romaji = romajiFor(current!.textContent!);
+
+    await user.keyboard(romaji);
+    expect(track.style.transform).not.toBe('translateX(-48px)');
+
+    await user.click(screen.getByRole('button', { name: 'Show filters' }));
+    await user.click(screen.getByRole('button', { name: 'ka-ko' }));
+
+    expect(track.style.transform).toBe('translateX(-48px)');
+    const restartedCurrent = track.querySelector('[aria-current="true"]');
+    expect(restartedCurrent).toBe(track.children[0]);
+  });
 });

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { createRound, useFilterContext } from '@wakana/core';
+import { CharacterFilter, GROUPS, createRound, useFilterContext } from '@wakana/core';
 import KanaSlider from '../components/KanaSlider';
 import { useTypingEngine } from '../hooks/useTypingEngine';
 
@@ -8,9 +8,42 @@ const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'https://www.wakana.sbs';
 const REFILL_THRESHOLD = 10;
 
 export function ArcadeSliderPage() {
-  const { selectedGroupIds, script } = useFilterContext();
+  const { selectedGroupIds, toggleGroup, toggleAllGroups, toggleGroupFamily, script, setScript } =
+    useFilterContext();
   const [tokens, setTokens] = useState(() => createRound(selectedGroupIds));
-  const { index, currentWrong } = useTypingEngine(tokens, () => setTokens(createRound(selectedGroupIds)));
+  const { index, currentWrong, resetEngine } = useTypingEngine(tokens, () =>
+    setTokens(createRound(selectedGroupIds)),
+  );
+
+  const targetKanaLength = useMemo(
+    () =>
+      GROUPS.filter((g) => selectedGroupIds.includes(g.id)).reduce(
+        (sum, g) => sum + g.entries.length,
+        0,
+      ),
+    [selectedGroupIds],
+  );
+
+  // Keep a stable ref to resetEngine so the filter-change effect below can
+  // always call the latest version without listing it as a dep (it is a new
+  // function reference on every render since it isn't memoised in the hook).
+  const resetEngineRef = useRef(resetEngine);
+  useEffect(() => {
+    resetEngineRef.current = resetEngine;
+  });
+
+  // When the shared filter selection changes, create a fresh round and reset
+  // the engine. The ref guard skips the initial mount so we don't double-create
+  // the first round (useState initializer already did it above).
+  const isFirstFilterRender = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRender.current) {
+      isFirstFilterRender.current = false;
+      return;
+    }
+    setTokens(createRound(selectedGroupIds));
+    resetEngineRef.current();
+  }, [selectedGroupIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ponytail: stream only ever grows (never trims the consumed head), so it's
   // O(session length) in memory/render for a long endless run. Rebase index
@@ -45,6 +78,17 @@ export function ArcadeSliderPage() {
         <section className="rounded-3xl border border-moss/20 bg-sand/60 p-6 shadow-[0_18px_50px_rgba(42,124,19,0.13)] backdrop-blur">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Kana Slider</h1>
           <p className="mt-1 text-sm text-sage">Kana scroll past — type the one in the middle.</p>
+
+          <CharacterFilter
+            groups={GROUPS}
+            selectedGroupIds={selectedGroupIds}
+            targetKanaLength={targetKanaLength}
+            onToggleGroup={toggleGroup}
+            onToggleAllGroups={toggleAllGroups}
+            onToggleGroupFamily={toggleGroupFamily}
+            script={script}
+            onScriptChange={setScript}
+          />
 
           <div className="mt-6 overflow-hidden rounded-2xl border border-moss/20 bg-cream">
             <KanaSlider tokens={tokens} script={script} index={index} currentWrong={currentWrong} />
